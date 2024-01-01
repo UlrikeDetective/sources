@@ -1,0 +1,141 @@
+---
+title: "custom_themes"
+format: docx
+editor: visual
+---
+
+## Custom_themes
+
+```{r custom_theme_white_nolegend}
+custom_theme_white_nolegend <- function() {
+  #theme_minimal() %+replace%  
+  theme(
+    # Define the overall appearance of the plot
+    plot.background = element_rect(fill = "white"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = "azure2"),
+    panel.grid.minor = element_blank(),
+    
+    # Define the appearance of the axes
+    axis.line = element_line(color = "black"),
+    axis.text = element_text(color = "black"),
+    axis.title = element_text(color = "black", size = 12, face = "bold"),
+    axis.ticks = element_line(color = "black"),
+    legend.position = "none",
+    
+    # Define the appearance of the plot title and subtitles
+    plot.title = element_text(color = "black", size = 14, face = "bold"),
+    plot.subtitle = element_text(color = "black", size = 12),
+    
+    # Define the appearance of the plot labels
+    plot.caption = element_text(color = "black", size = 10),
+    plot.tag = element_text(color = "black", size = 11, face = "bold"),
+    
+    # Remove the plot border
+    panel.border = element_blank()
+  )
+}
+```
+
+You can add options to executable code like this
+
+```{r custom_theme_white}
+custom_theme_white <- function() {
+  #theme_minimal() %+replace%  
+  theme(
+    # Define the overall appearance of the plot
+    plot.background = element_rect(fill = "white"),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = "azure2"),
+    panel.grid.minor = element_blank(),
+    
+    # Define the appearance of the axes
+    axis.line = element_line(color = "black"),
+    axis.text = element_text(color = "black"),
+    axis.title = element_text(color = "black", size = 12, face = "bold"),
+    axis.ticks = element_line(color = "black"),
+    
+    # Define the appearance of the legend
+    legend.background = element_rect(fill = "white"),
+    legend.title = element_text(color = "white", size = 10, face = "bold"),
+    legend.text = element_text(color = "black", size = 10),
+    
+    # Define the appearance of the plot title and subtitles
+    plot.title = element_text(color = "black", size = 14, face = "bold"),
+    plot.subtitle = element_text(color = "black", size = 12),
+    
+    # Define the appearance of the plot labels
+    plot.caption = element_text(color = "black", size = 10),
+    plot.tag = element_text(color = "black", size = 11, face = "bold"),
+    
+    # Remove the plot border
+    panel.border = element_blank()
+  )
+}
+```
+
+```{r custom_theme_black_nolegend}
+custom_theme_black_nolegend <- function() {
+  #theme_minimal() %+replace%  
+  theme(
+    # Define the overall appearance of the plot
+    plot.background = element_rect(fill = "black"),
+    panel.background = element_rect(fill = "black"),
+    panel.grid.major = element_line(color = "azure"),
+    panel.grid.minor = element_blank(),
+    
+    # Define the appearance of the axes
+    axis.line = element_line(color = "white"),
+    axis.text = element_text(color = "white"),
+    axis.title = element_text(color = "white", size = 12, face = "bold"),
+    axis.ticks = element_line(color = "white"),
+    legend.position = "none",
+    
+    # Define the appearance of the plot title and subtitles
+    plot.title = element_text(color = "white", size = 14, face = "bold"),
+    plot.subtitle = element_text(color = "white", size = 12),
+    
+    # Define the appearance of the plot labels
+    plot.caption = element_text(color = "white", size = 14),
+    plot.tag = element_text(color = "white", size = 11, face = "bold"),
+    
+    # Remove the plot border
+    panel.border = element_blank()
+  )
+}
+```
+
+```{r custom_theme_black}
+custom_theme_black <- function() {
+  #theme_minimal() %+replace%  
+  theme(
+    # Define the overall appearance of the plot
+    plot.background = element_rect(fill = "black"),
+    panel.background = element_rect(fill = "black"),
+    panel.grid.major = element_line(color = "azure"),
+    panel.grid.minor = element_blank(),
+    
+    # Define the appearance of the axes
+    axis.line = element_line(color = "white"),
+    axis.text = element_text(color = "white"),
+    axis.title = element_text(color = "white", size = 12, face = "bold"),
+    axis.ticks = element_line(color = "white"),
+    
+    # Define the appearance of the legend
+    legend.background = element_rect(fill = "black"),
+    legend.title = element_text(color = "white", size = 10, face = "bold"),
+    legend.text = element_text(color = "white", size = 10),
+    
+    # Define the appearance of the plot title and subtitles
+    plot.title = element_text(color = "white", size = 14, face = "bold"),
+    plot.subtitle = element_text(color = "white", size = 12),
+    
+    # Define the appearance of the plot labels
+    plot.caption = element_text(color = "white", size = 14),
+    plot.tag = element_text(color = "white", size = 11, face = "bold"),
+    
+    # Remove the plot border
+    panel.border = element_blank()
+  )
+}
+```

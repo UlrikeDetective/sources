@@ -1,0 +1,81 @@
+---
+title: "custom_colors"
+format: html
+editor: visual
+---
+
+## Custom_colors
+
+```{r}
+install.packages("paletteer")
+library(paletteer)
+
+my_palette_classic_blue <- paletteer_c("ggthemes::Classic Blue", 30)
+```
+
+You can add options to executable code like this
+
+```{r}
+
+my_palette_Harmonic <- paletteer_c("grDevices::Harmonic", 30)
+
+my_palette_Oslo <- paletteer_c("grDevices::Oslo", 30)
+
+# nice palette
+my_palette_Blue-Yellow <- paletteer_c("grDevices::Blue-Yellow", 30)
+
+my_palette_Viridis <- paletteer_c("grDevices::Viridis", 30)
+
+my_palette_TealGrn <- paletteer_c("grDevices::TealGrn", 30)
+
+my_palette_ag_GrnYL <- paletteer_c("grDevices::TealGrn", 30)
+
+
+```
+
+```{r}
+my_palette_Blue2DarkRed18Steps <- paletteer_d("colorBlindness::Blue2DarkRed18Steps")
+
+my_palette_BluetoDarkOrange_18 <- paletteer_d("dichromat::BluetoDarkOrange_18")
+
+```
+
+```{r}
+
+my_palette_light_blue_material <- paletteer_d("ggsci::light_blue_material")
+
+my_palette_cyan_material <- paletteer_d("ggsci::cyan_material")
+
+paletteer_d("ggsci::cyan_material")
+```
+
+```{r}
+
+my_palette_nuriel_Stone <- paletteer_d("ggthemes::Nuriel_Stone")
+
+```
+
+```{r}
+
+my_palette_dynamic <- paletteer_dynamic("cartography::turquoise.pal", 20)
+
+
+```
+
+```{r}
+
+my_palette_custom_yellow_blue <- c("#fcff4f", "#f5f955", "#edf35b", "#e6ed61", "#dee767", "#d7e16d", "#cfdb73", "#c8d579", "#c0d080", "#b9ca86", "#b1c48c", "#aabe92", "#a2b898", "#9bb29e", "#93aca4", "#8ca6aa", "#84a0b0", "#7d9ab6", "#7594bc", "#6e8ec2", "#6688c8", "#5f82ce", "#577dd5", "#5077db", "#4871e1", "#416be7", "#3965ed", "#325ff3", "#2a59f9", "#2353ff")
+
+
+my_palette_custom_orange_blue <- c("#ff6d2a", "#f86a31", "#f16639", "#ea6340", "#e35f47", "#dc5c4f", "#d55856", "#ce555d", "#c85165", "#c14e6c", "#ba4b73", "#b3477b", "#ac4482", "#a54089", "#9e3d91", "#973998", "#9036a0", "#8932a7", "#822fae", "#7b2bb6", "#7428bd", "#6d25c4", "#6721cc", "#601ed3", "#591ada", "#5217e2", "#4b13e9", "#4410f0", "#3d0cf8", "#3609ff")
+
+my_palette_custom_blues <- c("#34f5ff", "#33eff9", "#32e9f3", "#32e3ec", "#31dde6", "#30d7e0", "#2fd1da", "#2fcbd4", "#2ec6cd", "#2dc0c7", "#2cbac1", "#2cb4bb", "#2baeb5", "#2aa8ae", "#29a2a8", "#299ca2", "#28969c", "#279095", "#268a8f", "#268489", "#257e83", "#24787d", "#237376", "#236d70", "#22676a", "#216164", "#205b5e", "#205557", "#1f4f51", "#1e494b")
+
+
+my_palette_custom_lightyellow_darkgreen <- c("#fbffae", "#f3f9ab", "#ecf2a7", "#e4eca4", "#dde6a0", "#d5e09d", "#cdd99a", "#c6d396", "#becd93", "#b6c78f", "#afc08c", "#a7ba88", "#a0b485", "#98ad82", "#90a77e", "#89a17b", "#819b77", "#799474", "#728e71", "#6a886d", "#63816a", "#5b7b66", "#537563", "#4c6f5f", "#44685c", "#3c6259", "#355c55", "#2d5652", "#264f4e", "#1e494b")
+
+my_palette_custom_blues01 <- c("#1531ff", "#1631fa", "#1630f6", "#1730f1", "#1730ed", "#182fe8", "#182fe3", "#192fdf", "#192fda", "#1a2ed5", "#1a2ed1", "#1b2ecc", "#1b2dc8", "#1c2dc3", "#1c2dbe", "#1d2cba", "#1d2cb5", "#1e2cb0", "#1e2bac", "#1f2ba7", "#1f2ba3", "#202a9e", "#202a99", "#212a95", "#212a90", "#22298b", "#222987", "#232982", "#23287e", "#242879")
+
+
+my_palette_custom_all <- c("#34f5ff", "#33eff9", "#32e9f3", "#32e3ec", "#31dde6", "#30d7e0", "#2fd1da", "#2fcbd4", "#2ec6cd", "#2dc0c7", "#2cbac1", "#2cb4bb", "#2baeb5", "#2aa8ae", "#29a2a8", "#299ca2", "#28969c", "#279095", "#268a8f", "#268489", "#257e83", "#24787d", "#237376", "#236d70", "#22676a", "#216164", "#205b5e", "#205557", "#1f4f51", "#1e494b", "#fcff4f", "#f5f955", "#edf35b", "#e6ed61", "#dee767", "#d7e16d", "#cfdb73", "#c8d579", "#c0d080", "#b9ca86", "#b1c48c", "#aabe92", "#a2b898", "#9bb29e", "#93aca4", "#8ca6aa", "#84a0b0", "#7d9ab6", "#7594bc", "#6e8ec2", "#6688c8", "#5f82ce", "#577dd5", "#5077db", "#4871e1", "#416be7", "#3965ed", "#325ff3", "#2a59f9", "#2353ff","#1531ff", "#1631fa", "#1630f6", "#1730f1", "#1730ed", "#182fe8", "#182fe3", "#192fdf", "#192fda", "#1a2ed5", "#1a2ed1", "#1b2ecc", "#1b2dc8", "#1c2dc3", "#1c2dbe", "#1d2cba", "#1d2cb5", "#1e2cb0", "#1e2bac", "#1f2ba7", "#1f2ba3", "#202a9e", "#202a99", "#212a95", "#212a90", "#22298b", "#222987", "#232982", "#23287e", "#242879", "#ff6d2a", "#f86a31", "#f16639", "#ea6340", "#e35f47", "#dc5c4f", "#d55856", "#ce555d", "#c85165", "#c14e6c", "#ba4b73", "#b3477b", "#ac4482", "#a54089", "#9e3d91", "#973998", "#9036a0", "#8932a7", "#822fae", "#7b2bb6", "#7428bd", "#6d25c4", "#6721cc", "#601ed3", "#591ada", "#5217e2", "#4b13e9", "#4410f0", "#3d0cf8", "#3609ff", "#fbffae", "#f3f9ab", "#ecf2a7", "#e4eca4", "#dde6a0", "#d5e09d", "#cdd99a", "#c6d396", "#becd93", "#b6c78f", "#afc08c", "#a7ba88", "#a0b485", "#98ad82", "#90a77e", "#89a17b", "#819b77", "#799474", "#728e71", "#6a886d", "#63816a", "#5b7b66", "#537563", "#4c6f5f", "#44685c", "#3c6259", "#355c55", "#2d5652", "#264f4e", "#1e494b")
+```
