@@ -1,0 +1,63 @@
+---
+title: "SBBudget_Flow
+format: docx
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+# Creating the data
+SBB <- c("Mitte", "Nordost", "Ost", "Südost", "Süd", "Südwest", "West", "Alt-West", "Nordwest", "Nord")
+Anzahl_eingereicht <- c(113, 77, 131, 81, 108, 133, 95, 121, 73, 109)
+Anzahl_beschlossen <- c(55, 29, 51, 39, 59, 58, 54, 62, 39, 55)
+Summe2021 <- c("50.000 €", "49.915 €", "49.293 €", "31.910 €", "49.990 €", "32.159 €", "50.000 €", "45.550 €", "41.391 €", "31.732 €")
+Summe2022 <- c("49.577 €", "49.745 €", "43.395 €", "49.993 €", "46.400 €", "49.990 €", "44.415 €", "49.962 €", "27.349 €", "33.978 €")
+Summe2023 <- c("50.000 €", "40.572 €", "32.250 €", "20.534 €", "50.000 €", "49.999 €", "41.563 €", "40.167 €", "37.731 €", "47.700 €")
+
+# Creating the dataframe
+SBBudget <- data.frame(SBB, Anzahl_eingereicht, Anzahl_beschlossen, Summe2021, Summe2022, Summe2023, stringsAsFactors = FALSE)
+
+# Converting currency columns to numeric
+SBBudget$Summe2021 <- as.numeric(gsub(" €", "", SBBudget$Summe2021))
+SBBudget$Summe2022 <- as.numeric(gsub(" €", "", SBBudget$Summe2022))
+SBBudget$Summe2023 <- as.numeric(gsub(" €", "", SBBudget$Summe2023))
+
+# Displaying the dataframe
+print(SBBudget)
+
+```
+
+```{r}
+library(ggplot2)
+
+# Assuming SBBudget dataframe has been created
+
+SBBudget_long <- tidyr::pivot_longer(SBBudget, cols = starts_with("Summe"), names_to = "Year", values_to = "Summe")
+
+ggplot(data = SBBudget_long,
+       aes(axis1 = SBB, axis2 = Year, y = Summe)) +
+  geom_alluvium(aes(fill = Year)) +
+  geom_stratum() +
+  geom_text(stat = "stratum",
+            aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("SBB", "Year"),
+                   expand = c(0.15, 0.05)) +
+  theme_void() + 
+  theme(legend.position = "none")
+
+SBBudget_long
+
+```

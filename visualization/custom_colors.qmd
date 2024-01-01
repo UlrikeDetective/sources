@@ -9,20 +9,38 @@ editor: visual
 ```{r}
 install.packages("paletteer")
 library(paletteer)
+install.packages("wesanderson")
+library(wesanderson)
+install.packages("ggsci")
+library(ggsci)
+install.packages("nord")
+library(nord)
+install.packages("iWantHue")
+library(iWantHue)
+install.packages("colorspace")
+library(colorspace)
+install.packages("ggthemes")
+library(ggthemes)
+install.packages("RColorBrewer")
+library(RColorBrewer)
+install.packages("viridisLite")
+library(viridisLite)
+install.packages("paletteer")
+library(paletteer)
 
-my_palette_classic_blue <- paletteer_c("ggthemes::Classic Blue", 30)
 ```
 
 You can add options to executable code like this
 
 ```{r}
 
+my_palette_classic_blue <- paletteer_c("ggthemes::Classic Blue", 30)
+
 my_palette_Harmonic <- paletteer_c("grDevices::Harmonic", 30)
 
 my_palette_Oslo <- paletteer_c("grDevices::Oslo", 30)
 
-# nice palette
-my_palette_Blue-Yellow <- paletteer_c("grDevices::Blue-Yellow", 30)
+my_palette_Blue_Yellow <- paletteer_c("grDevices::Blue-Yellow", 30)
 
 my_palette_Viridis <- paletteer_c("grDevices::Viridis", 30)
 

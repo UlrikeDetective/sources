@@ -1,0 +1,209 @@
+---
+title: "Slopegraph"
+format: html
+editor: visual
+---
+
+# **Slopegraph in ggplot2**
+
+Consider the following subset of the `newgdp` data frame from the `CGPfunctions` package, that also contains the function we are going to use in this tutorial.
+
+```{r}
+install.packages("CGPfunctions")
+library(CGPfunctions)
+```
+
+You can add options to executable code like this
+
+```{r}
+df <- newgdp[16:30, ]
+
+df
+```
+
+## **The `newggslopegraph` function from the `CGPfunctions` package**
+
+Given a data frame with at least three columns that represent the times (X axis), the measurement (Y axis) and the grouping (the different groups) you can create a slope graph in ggplot2 making use of the `newggslopegraph` from `CGPfunctions` package passing the data frame and specifying the names of the columns:
+
+```{r}
+newggslopegraph(dataframe = df,
+                Times = Year,
+                Measurement = GDP,
+                Grouping = Country)
+```
+
+**Adding title, Text sizes and justification**
+
+The function also provides lots of arguments to customize the size and alingment of the texts. The argument names are self explanatory.
+
+```{r}
+newggslopegraph(df, Year, GDP, Country,
+                Title = "GDP evolution",
+                SubTitle = "1970-1979",
+                Caption = "By R CHARTS",
+                XTextSize = 18,    # Size of the times
+                YTextSize = 2,     # Size of the groups
+                TitleTextSize = 14,
+                SubTitleTextSize = 12,
+                CaptionTextSize = 10,
+                TitleJustify = "right",
+                SubTitleJustify = "right",
+                CaptionJustify = "left",
+                DataTextSize = 2.5) # Size of the data
+```
+
+**Reverse axes**
+
+Note that you can also reverse the axes. Type `?newggslopegraph` for additional details.
+
+```{r}
+newggslopegraph(df, Year, GDP, Country,
+                Title = "GDP evolution",
+                SubTitle = "1970-1979",
+                Caption = "By R CHARTS",
+                ReverseYAxis = TRUE,
+                ReverseXAxis = FALSE) 
+```
+
+## **Colors and lines customization**
+
+**Line tickness**
+
+By default, the widths of the lines of the chart are equal to 1, but you can change them with the `LineThickness` argument.
+
+```{r}
+
+newggslopegraph(df, Year, GDP, Country,
+                Title = "GDP evolution",
+                SubTitle = "1970-1979",
+                Caption = "By R CHARTS",
+                LineThickness = 2.5) 
+
+```
+
+**color**
+
+```{r}
+cols <- c("Finland" = "gray", "Canada" = "gray",
+          "Italy" = "gray", "US" = "red",
+          "Greece" = "gray", "Switzerland" = "gray",
+          "Spain" = "green", "Japan" = "gray")
+
+newggslopegraph(df, Year, GDP, Country,
+                Title = "GDP evolution",
+                SubTitle = "1970-1979",
+                Caption = "By R CHARTS",
+                LineColor = cols)  
+```
+
+**Labels background color**
+
+If for some reason you want to highlight the values of the graph you can add a fill color and a border to them. As the default padding is 0 you can also increase it for better visualization.
+
+```{r}
+newggslopegraph(df, Year, GDP, Country,
+                Title = "GDP evolution",
+                SubTitle = "1970-1979",
+                Caption = "By R CHARTS",
+                DataLabelPadding = 0.2,
+                DataLabelLineSize = 0.5,
+                DataLabelFillColor = "lightblue")
+```
+
+## **Themes**
+
+Finally, the function also provides the `ThemeChoice` argument to modify the theme used. The default value is `"bw"` and the possible options are displayed below.
+
+```{r}
+
+# install.packages("ggthemes")
+newggslopegraph(df, Year, GDP, Country,
+                Title = "GDP evolution",
+                SubTitle = "1970-1979",
+                Caption = "By R CHARTS",
+                ThemeChoice = "econ")
+```
+
+```{r}
+# install.packages("ggthemes")
+
+newggslopegraph(df, Year, GDP, Country,
+                Title = "GDP evolution",
+                SubTitle = "1970-1979",
+                Caption = "By R CHARTS",
+                ThemeChoice = "wsj")
+```
+
+**Example Data: SBBudget**
+
+```{r}
+SBB <- c("Mitte", "Nordost", "Ost", "Südost", "Süd", "Südwest", "West", "Alt-West", "Nordwest", "Nord")
+Anzahl_eingereicht <- c(113, 77, 131, 81, 108, 133, 95, 121, 73, 109)
+Anzahl_beschlossen <- c(55, 29, 51, 39, 59, 58, 54, 62, 39, 55)
+Summe2021 <- c("50.000 €", "49.915 €", "49.293 €", "31.910 €", "49.990 €", "32.159 €", "50.000 €", "45.550 €", "41.391 €", "31.732 €")
+Summe2022 <- c("49.577 €", "49.745 €", "43.395 €", "49.993 €", "46.400 €", "49.990 €", "44.415 €", "49.962 €", "27.349 €", "33.978 €")
+Summe2023 <- c("50.000 €", "40.572 €", "32.250 €", "20.534 €", "50.000 €", "49.999 €", "41.563 €", "40.167 €", "37.731 €", "47.700 €")
+
+# Creating the dataframe
+SBBudget <- data.frame(SBB, Anzahl_eingereicht, Anzahl_beschlossen, Summe2021, Summe2022, Summe2023, stringsAsFactors = FALSE)
+
+# Converting currency columns to numeric
+SBBudget$Summe2021 <- as.numeric(gsub(" €", "", SBBudget$Summe2021))
+SBBudget$Summe2022 <- as.numeric(gsub(" €", "", SBBudget$Summe2022))
+SBBudget$Summe2023 <- as.numeric(gsub(" €", "", SBBudget$Summe2023))
+
+SBBudget_long <- tidyr::pivot_longer(SBBudget, cols = starts_with("Summe"), names_to = "Year", values_to = "Summe")
+
+SBBudget_long
+```
+
+```{r}
+
+newggslopegraph(SBBudget_long, Year, Summe, SBB,
+                Title = "SBBudget 2021 - 2023",
+                SubTitle = "Summe je Stadtbezirk",
+                Caption = "By R CHARTS",
+                DataLabelPadding = 0.2,
+                DataLabelLineSize = 0.5,
+                DataLabelFillColor = "lightblue",
+                LineThickness = 2.5,
+                ThemeChoice = "wsj")
+```
+
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+# Assuming SBBudget dataframe has been created
+
+# Reshape the data to long format using tidyr
+SBBudget_long <- SBBudget %>%
+  pivot_longer(cols = starts_with("Summe"), names_to = "Year", values_to = "Summe") %>%
+  mutate(Year = gsub("Summe", "", Year)) # Extracting the year
+
+# Find the values for the first and last years for each SBB
+label_data <- SBBudget_long %>%
+  group_by(SBB) %>%
+  filter(as.numeric(Year) %in% range(as.numeric(Year))) %>%
+  ungroup()
+
+# Plotting the slope graph and adding labels
+ggplot(data = SBBudget_long, aes(x = as.numeric(Year), y = Summe, group = SBB)) +
+  geom_line(aes(color = SBB), size = 1.2) +
+  geom_point(aes(color = SBB), size = 3) +
+  geom_text(data = subset(label_data, Year == min(Year)), 
+            aes(label = SBB, x = as.numeric(Year) - 0.2, y = Summe), 
+            hjust = 1, size = 3, color = "black") +
+  geom_text(data = subset(label_data, Year == max(Year)), 
+            aes(label = SBB, x = as.numeric(Year) + 0.2, y = Summe), 
+            hjust = 0, size = 3, color = "black") +
+  labs(title = "SBBudget 2021-2023",
+       subtitle = "Summe nach Stadtbezirk",
+       caption = "By R CHARTS") +
+  scale_x_continuous(breaks = as.numeric(c(2021, 2022, 2023)), labels = c("2021", "2022", "2023")) +
+  theme(legend.position = "none") +
+  theme_minimal() # Modify the theme as needed
+
+
+```
