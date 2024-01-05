@@ -124,7 +124,7 @@ df_pie <- data.frame(value = c(15, 25, 32, 28),
 
 ## **Pie chart with values outside using `ggrepel`**
 
-If you need to display the values of your pie chart outside for styling or because the labels doesn\'t fit inside the slices you can use the `geom_label_repel` function of the `ggrepel` package after transforming the original data frame as in the example below.
+If you need to display the values of your pie chart outside for styling or because the labels doesn't fit inside the slices you can use the `geom_label_repel` function of the `ggrepel` package after transforming the original data frame as in the example below.
 
 ```{r}
 # install.packages("ggplot2")
@@ -303,7 +303,7 @@ ggplot(df_pie2, aes(x = "", y = value, fill = group)) +
 
 **Adding labels**
 
-An alternative to `geom_text` is using `geom_label`, which adds a border around the values. If you set this the legend will display the letter \"a\" inside the boxes, so we have overridden this behavior with `show.legend = FALSE`.
+An alternative to `geom_text` is using `geom_label`, which adds a border around the values. If you set this the legend will display the letter "a" inside the boxes, so we have overridden this behavior with `show.legend = FALSE`.
 
 ```{r}
 # install.packages("ggplot2")
