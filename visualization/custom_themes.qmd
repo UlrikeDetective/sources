@@ -142,3 +142,35 @@ custom_theme_black <- function() {
 
 ```         
 ```
+
+**Custom Layout for charts (multiply charts side by side)**
+
+```{r, echo = FALSE}
+
+library(ggplot2)
+library(patchwork)
+
+# First plot
+plot1 <- ggplot(country_count_desc_na, aes(x = reorder(Country, -n), y = n, fill = Country)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Country", y = "Count") +
+  scale_fill_manual(values = my_palette_custom_all)  +
+  ggtitle("Reported Layoffs 2023 - Most reported layoffs by country \n (counted)") +
+  custom_theme_white_nolegend()  +
+  coord_flip()
+
+# Second plot
+plot2 <- ggplot(country_count_desc_na, aes(x = "", y = n, fill = `Country`)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(fill = "Country") +
+  ggtitle("Reported Layoffs 2023 - Most reported layoffs by \n Country (counted)") +
+  scale_fill_manual(values = my_colors) +
+  geom_label(aes(y = n/2, label = paste0(n/10, "%")), size = 4.5) + # Add labels
+  theme_void() +
+  custom_theme_white_nolegend()
+
+# Arrange plots side by side
+plot1 + plot2 + plot_layout(ncol = 2)
+
+```
