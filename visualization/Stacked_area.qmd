@@ -1,0 +1,176 @@
+---
+title: "Stacked area plot in R"
+format: html
+editor: visual
+---
+
+# **Stacked area plot in R**
+
+## **Sample data set**
+
+Consider the `longley` data set, which contains macroeconomic data of several years.
+
+```{r}
+# Sample dataset
+df <- longley
+df
+
+# X-axis variable
+x <- df$Year
+
+# Variables to be stacked
+y <- df[, c(1, 2, 3, 4, 5, 7)]
+y
+```
+
+## **The `areaplot` function**
+
+The most straightforward way for creating a stacked area chart in base R is using the `areaplot` package, which contains a function of the same name for this purpose. Check also the [percentange stacked area chart](https://r-charts.com/evolution/percentage-stacked-area/) for a stacked chart where each serie is displayed as percentage.
+
+You can pass **two numerical variables to the function or specify a formula** to create the area plot. Note that the default colors are in gray scale.
+
+```{r}
+install.packages("areaplot")
+library(areaplot)
+
+# Stacked area chart
+areaplot(x, y,
+         main = "Stacked area chart",
+         xlab = "Year")
+
+# Equivalent to:
+areaplot(.~Year, data = df,
+         main = "Stacked area chart",
+         xlab = "Year") 
+```
+
+## **Color customization**
+
+The `cols` argument can be used to customize the color palette used to colorize each area. In the following example we are using the well-known viridis palette with 0.8 transparency.
+
+```{r}
+# install.packages("areaplot")
+library(areaplot)
+
+# Colors
+cols <- hcl.colors(6, palette = "viridis", alpha = 0.8)
+
+# Stacked area chart with custom colors
+areaplot(x, y,
+         col = cols) 
+```
+
+The lines style can be customized making use of additional arguments. For instance, you can customize the border color with `border` and change the line width and line type with `lwd` and `lty`, respectively.
+
+```{r}
+# install.packages("areaplot")
+library(areaplot)
+
+# Colors
+cols <- hcl.colors(6, palette = "ag_Sunset")
+
+# Stacked area chart with custom borders
+areaplot(x, y, col = cols,
+         border = "white",
+         lwd = 1,
+         lty = 1) 
+```
+
+## **Adding a legend**
+
+Setting `legend = TRUE` as an argument of the `areaplot` function a legend will be created automatically. You can override the default arguments for the legend with `args.legend`. See the [legends article](https://r-charts.com/base-r/legend/) for more details.
+
+```{r}
+# install.packages("areaplot")
+library(areaplot)
+
+# Colors
+cols <- hcl.colors(6, palette = "PinkYl")
+
+# Area plot with legend
+areaplot(x, y, col = cols,
+         legend = TRUE,
+         args.legend = list(x = "topleft", cex = 0.65)) 
+```
+
+# **Percentage stacked area chart in R**
+
+## **Sample data set**
+
+The data set used in the following examples is a subset of the `longley` data set, where the `x` variable represents the year and the `y` the measure of several variables for each year.
+
+```{r}
+# Sample data set
+df <- longley
+
+# X-axis variable
+x <- df$Year
+
+# Variables to be stacked
+y <- df[, c(1, 2, 3, 4, 5, 7)]
+```
+
+## **Percentage stacked area chart**
+
+In order to create a percentage stacked area plot in R (also known as 100% stacked area chart) you can make use of the `areaplot` function of the package of the same name. You just need to pass your data an set `prop = TRUE`.
+
+```{r}
+# install.packages("areaplot")
+library(areaplot)
+
+# Percentage stacked area chart
+areaplot(x, y, prop = TRUE)
+
+# Equivalent to:
+areaplot(. ~ Year, data = df, prop = TRUE) 
+
+```
+
+## **Color customization**
+
+You can pass a vector of colors to the `col` argument to customize the default gray scale. In the following example we are creating a vector of colors of the viridis color palette with a 0.8 level of transparency.
+
+```{r}
+# install.packages("areaplot")
+library(areaplot)
+
+# Colors
+cols <- hcl.colors(6, palette = "viridis", alpha = 0.8)
+
+# Stacked area chart with custom colors
+areaplot(x, y, prop = TRUE,
+         col = cols) 
+```
+
+The function allows passing additional arguments to the `polygon` function (used by the package). This allows customizing the border, line width and line type of the stacked areas.
+
+```{r}
+# install.packages("areaplot")
+library(areaplot)
+
+# Colors
+cols <- hcl.colors(6, palette = "ag_Sunset")
+
+# Stacked area chart with custom borders
+areaplot(x, y, prop = TRUE, col = cols,
+         border = "white",
+         lwd = 1,
+         lty = 1) 
+```
+
+## **Adding a legend**
+
+The function also provides a way to add an automatic legend setting `legend = TRUE`. [Additional arguments](https://r-charts.com/base-r/legend/) of the `legend` function can be passed through `args.legend` as a list.
+
+```{r}
+# install.packages("areaplot")
+library(areaplot)
+
+# Colors
+cols <- hcl.colors(6, palette = "PinkYl")
+
+areaplot(x, y, prop = TRUE, col = cols,
+         legend = TRUE,
+         args.legend = list(x = "topleft", cex = 0.65,
+                            bg = "white", bty = "o")) 
+```
