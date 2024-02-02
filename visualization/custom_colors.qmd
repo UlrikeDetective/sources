@@ -15,8 +15,8 @@ install.packages("ggsci")
 library(ggsci)
 install.packages("nord")
 library(nord)
-install.packages("iWantHue")
-library(iWantHue)
+#install.packages("iWantHue")
+#library(iWantHue)
 install.packages("colorspace")
 library(colorspace)
 install.packages("ggthemes")
@@ -25,8 +25,6 @@ install.packages("RColorBrewer")
 library(RColorBrewer)
 install.packages("viridisLite")
 library(viridisLite)
-install.packages("paletteer")
-library(paletteer)
 
 ```
 
@@ -82,7 +80,7 @@ my_palette_dynamic <- paletteer_dynamic("cartography::turquoise.pal", 20)
 
 ```{r}
 
-my_palette_custom_yellow_blue <- c("#fcff4f", "#f5f955", "#edf35b", "#e6ed61", "#dee767", "#d7e16d", "#cfdb73", "#c8d579", "#c0d080", "#b9ca86", "#b1c48c", "#aabe92", "#a2b898", "#9bb29e", "#93aca4", "#8ca6aa", "#84a0b0", "#7d9ab6", "#7594bc", "#6e8ec2", "#6688c8", "#5f82ce", "#577dd5", "#5077db", "#4871e1", "#416be7", "#3965ed", "#325ff3", "#2a59f9", "#2353ff")
+my_palette_custom_yellow_blue <- c("lightyellow", "yellow", "#dee767", "#34f5ff", "#299ca2", "darkslategray3","deepskyblue1", "#1531ff", "#2353ff", "#232982")
 
 
 my_palette_custom_orange_blue <- c("#ff6d2a", "#f86a31", "#f16639", "#ea6340", "#e35f47", "#dc5c4f", "#d55856", "#ce555d", "#c85165", "#c14e6c", "#ba4b73", "#b3477b", "#ac4482", "#a54089", "#9e3d91", "#973998", "#9036a0", "#8932a7", "#822fae", "#7b2bb6", "#7428bd", "#6d25c4", "#6721cc", "#601ed3", "#591ada", "#5217e2", "#4b13e9", "#4410f0", "#3d0cf8", "#3609ff")
