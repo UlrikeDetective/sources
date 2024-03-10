@@ -107,7 +107,7 @@ legend("topright", legend = c("Yes", "No"),
 
 There are several methods available for arranging the data points. Each method uses a different algorithm ensuring that the data points are not overlapped.
 
-**\"swarm\" method (default)**
+**"swarm" method (default)**
 
 This method places the points in increasing order.
 
@@ -125,7 +125,7 @@ beeswarm(x, col = 4, pch = 19,
 
 ```
 
-**\"center\" method**
+**"center" method**
 
 The center method creates a symmetric swarm using a square grid.
 
@@ -143,7 +143,7 @@ beeswarm(x, col = 4, pch = 19,
 
 ```
 
-**\"hex\" method**
+**"hex" method**
 
 This method uses a hexagonal grid to place the data points.
 
@@ -184,7 +184,7 @@ beeswarm(x ~ g, pch = 19,
 
 ## **Bee swarm corral methods**
 
-If some observations are placed outside the plot area you can use a \"corral\" method, which will adjust that data points accordingly to the selected method.
+If some observations are placed outside the plot area you can use a "corral" method, which will adjust that data points accordingly to the selected method.
 
 ```{r}
 # install.packages("beeswarm")
