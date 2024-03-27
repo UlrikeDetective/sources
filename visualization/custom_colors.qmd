@@ -5,6 +5,7 @@ editor: visual
 ---
 
 ## Custom_colors
+## different themes for different projects
 
 ```{r}
 install.packages("paletteer")
