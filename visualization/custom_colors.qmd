@@ -103,3 +103,37 @@ my_colors <- c("darkblue", "darkslategray4", "darkslategray2","yellow", "azure3"
 my_colors5 <- c("yellow", "#deff25", "#44c6b7", "#601ed3", "#190fe4")
 my_colors3 <- c("yellow", "#190fe4", "#44c6b7")
 ```
+
+```{r}
+yoga_theme_blue <- c("#4F5361", "#353E55", "#B6F9FF", "#78B1E5", "#5281B4" )
+
+yoga_theme_six <- c("#00CCBB", "#A0DED9", "#FFF9D4", "#FFE5AC", "#FCC868", "#F69F2D")
+```
+
+```{r}
+boho_purple_theme <- c("#927397", "#D6809c", "#E7CBAE", "#FAF5EF", "#7F7F7F")
+```
+
+```{r}
+colors_of_the_sea_theme <- c("#e0ece4", "#f7f2e7", "#d8d3cd", "#797a7e", "#3a3b3b")
+```
+
+```{r}
+power_yoga_theme <- c("#b82677", "#ec7545", "#a9d2cc", "#f4f5f6", "#221f20")
+```
+
+```{r}
+feminine_theme <- c("#f2aa98", "#fcf1ef", "#bfbfbf", "#f4f4f4", "#00000")
+```
+
+```{r}
+yoga_in_the_park_theme <- c("#bfae4a", "#e09592", "#f7e6e3", "#e4e4e2", "#474844")
+```
+
+```{r}
+winter_yoga_theme <- c("#707477", "#b0b1b1", "#dadac3", "#d8ccc1", "#2b2d2f", "#2b3241", "#9ea2ad", "#8b694d", "#e8e2d0", "#b0a18b")
+```
+
+```{r}
+yin_yoga_theme <- c("#e5babf", "#fcf1ef", "#e7d8c9", "#cdd3d6", "#5e616b")
+```
