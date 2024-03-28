@@ -5,6 +5,7 @@ editor: visual
 ---
 
 ## Custom_colors
+
 ## different themes for different projects
 
 ```{r}
@@ -137,4 +138,8 @@ winter_yoga_theme <- c("#707477", "#b0b1b1", "#dadac3", "#d8ccc1", "#2b2d2f", "#
 
 ```{r}
 yin_yoga_theme <- c("#e5babf", "#fcf1ef", "#e7d8c9", "#cdd3d6", "#5e616b")
+```
+
+```{r}
+youtube_yoga_theme <- c("#e5babf", "#fcf1ef", "#e7d8c9", "#cdd3d6", "#5e616b", "#4F5361", "#353E55", "#B6F9FF", "#78B1E5", "#5281B4", "#bfae4a", "#e09592", "#f7e6e3", "#e4e4e2", "#474844")
 ```
