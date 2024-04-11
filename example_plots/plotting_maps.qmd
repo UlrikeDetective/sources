@@ -25,11 +25,11 @@ ingv <- read.csv("./ingv.csv", sep="|")
 ingv
 ```
 
-What I\'m doing here is getting the current date and creating a call to invoke the INGV web service so that i t can return a text file containing all events starting from a certain date in Italy. That text file is saved in my working directory as ./ingv.csv
+What I'm doing here is getting the current date and creating a call to invoke the INGV web service so that i t can return a text file containing all events starting from a certain date in Italy. That text file is saved in my working directory as ./ingv.csv
 
 INGV returns the values separated by a pipe character so I need to specify it in the csv reading function.
 
-The data is already tidy and in the format that I need for now so I won\'t run other commands in the data frame in order to manipulate it.
+The data is already tidy and in the format that I need for now so I won't run other commands in the data frame in order to manipulate it.
 
 # **Quick plot with rworldmap**
 
@@ -37,7 +37,7 @@ The data is already tidy and in the format that I need for now so I won\'t run o
 # install.packages("mapdata")
 ```
 
-First way of plotting the data would be by using the rworldmap package. I\'ll use that to create a png file for my plot that will map all events occurred in the region.
+First way of plotting the data would be by using the rworldmap package. I'll use that to create a png file for my plot that will map all events occurred in the region.
 
 ```{r}
 library(mapdata)
