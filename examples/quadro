@@ -1,0 +1,402 @@
+---
+title: "Hello Quarto"
+subtitle: "Standalone HTML"
+date: "2024-04-12"
+author: Ulrike
+title-block-banner: '#F8F5F0'
+title-block-banner-color: '#325D88'
+toc: true
+toc-expand: true
+format:
+    html:
+        theme: sandstone
+        embed-resources: true
+        font-color: '#325D88'
+        linestretch: 1.2
+---
+
+# Hello World
+
+## Quarto is fun
+Let's find out if it really is.
+
+## You can use R
+To use R and python together, need to load python via `reticulate` R libaries to showcase R's `reactable`
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+library(reticulate)
+library(reactable)
+library(htmltools)
+
+reticulate::use_virtualenv('/Users/jung/Projects/quarto_tutorial/.venv/')
+
+```
+
+
+## You can use Python
+```{python}
+#| message: false
+#| warning: false
+#| echo: false
+#| error: false
+import polars as pl
+import polars.selectors as cs
+import altair as alt
+from vega_datasets import data
+
+alt.data_transformers.disable_max_rows()
+
+
+raw_data = (pl.read_csv("data/County_data.csv", null_values="NA"))
+raw_data_pandas = raw_data.select(~cs.contains("Percentile")).to_pandas()
+
+colorado_enviro = (raw_data
+    .select(~cs.contains("Percentile"))
+    .drop(
+        "Prior Disproportionately Impacted Community (January 2023-May 2023)",
+        "area", 
+        "Justice40", 
+        "Disproportionately Impacted Community (May 2023)", 
+        "AQCC Reg 3 Disproportionately Impacted Community"
+    )
+)
+
+colorado_enviro_pandas = colorado_enviro.to_pandas()
+
+plot_df = (
+    colorado_enviro.drop("area")
+    .melt(id_vars=["County Name", "GEOID"], value_name="value", variable_name="metric")
+    .with_columns(
+        pl.col("value").cast(pl.Float64),
+        pl.when(
+            pl.col("metric").str.contains("Percentile"))
+            .then(pl.lit("metric_percentile"))
+            .otherwise(pl.lit("metric_value")).alias("percentile")
+    )
+)
+
+counties = alt.topo_feature(data.us_10m.url, "counties")
+
+# Long or "Tidy" dataframes are necessary for plotting
+plot_df = (
+    colorado_enviro
+    .melt(
+        id_vars=["County Name", "GEOID"], 
+        value_name="value", 
+        variable_name="metric")
+    .with_columns(
+        pl.col("value").cast(pl.Float64)
+    )
+)
+
+# reticulate only supports pandas df transfer right now
+plot_df_pandas = plot_df.fill_null(0).to_pandas()
+
+# Admittedly mark_geoshape() is not the most intuitive function
+# `counties`` data is a GeoJSON that contains 
+# shapefiles (polygon information for county/state)
+
+# In general GEOID or FIPS codes should generally be 
+# considered equivalent, sometimes the GEOID tends to 
+# concatenate country/state.
+state_zoom = (
+    alt.Chart(plot_df)
+    .mark_geoshape(strokeWidth=0.5, stroke="darkgreen")
+    .encode(
+        shape="geo:G",
+        color=(
+            alt.Color("value:Q")
+            .legend(
+                orient="top", 
+                labelFontSize=10, 
+                titleAlign='left')
+            .title(None)
+        ),
+        tooltip=["County Name", "GEOID", "metric", "value"],
+    )
+    .transform_lookup(
+        lookup="GEOID", 
+        from_=alt.LookupData(data=counties, key="id"), 
+        as_="geo"
+    )
+    .transform_filter(
+        alt.datum.metric=="Total Population"
+    )
+    .project(type="albersUsa")
+    .properties(width=300, height=300)
+)
+
+state_zoom_json = state_zoom.to_json()
+
+metrics_list = sorted(plot_df.select("metric").unique().to_series().to_list())
+
+state_zoom
+
+```
+
+
+## Transfering data across Quarto cells
+Quarto does have some functions in development to transfer data across languages
+
+One is via `reticulate` and other is via observable's `ojs_define()`.
+
+Transferring anything from python side transfer is the most problems, and the only way to make python virtual environment currently is to use this workaround of
+`python` --> `R` --> `Observable`
+
+Reticulate issues:
+- Feature request: Support Polars DataFrames https://github.com/rstudio/reticulate/issues/1319
+
+
+```{r}
+#| column: page
+#| echo: false
+
+metrics_list_in_r = py$metrics_list
+state_zoom_json_in_r = py$state_zoom_json
+plot_df_in_r = py$plot_df_pandas
+raw_data_in_r = py$raw_data_pandas
+colorado_enviro_in_r = py$colorado_enviro_pandas
+
+ojs_define(metrics_list_in_r)
+ojs_define(plot_df_in_r)
+ojs_define(colorado_enviro_in_r)
+ojs_define(raw_data_in_r)
+ojs_define(state_zoom_json_in_r)
+```
+
+
+
+## The Forbidden Symphony 
+
+1. Use Quarto's layout to create side-by-side columns
+2. Use Altair (python) to create the geomaps
+3. Use Observable Input for quick dropdown menu
+
+
+```{ojs}
+//| echo: false
+
+import { vl } from "@vega/vega-lite-api"
+
+embed = require("vega-embed@6")
+
+colorado_chloropleth_vl_left = JSON.parse(state_zoom_json_in_r)
+colorado_chloropleth_vl_right = JSON.parse(state_zoom_json_in_r)
+
+```
+
+
+:::: {.columns padding="10px"}
+
+::: {.column width="50%" margin="0.10em"}
+
+```{ojs}
+//| echo: false
+
+// Creates an Observable "viewof" for
+// 1) dropdown
+// 2) choropleth mapping
+// `selected_metric` above.
+
+// DROPDOWN: Observable Input dropdown menu, defaults to "Drought"
+viewof selected_metric = Inputs.select(metrics_list_in_r, {value: "Drought"})
+
+// CHOROPLETH MAP: Hardcoding the `transform` key to Vega's second array item [1]
+// First array items is [0] - the base ID-to-polygon mapping.
+// Alternative ideas welcome 
+viewof colorado_chloropleth_left = {
+    colorado_chloropleth_vl_left.transform[1].filter = `(datum.metric === '${selected_metric}')`
+    return embed(colorado_chloropleth_vl_left);
+}
+
+// For the Observable cell to register the data we use transpose() to retrieve
+// any compatible objects from R
+plot_df_in_ojs_right = transpose(plot_df_in_r)
+
+// FILTERING DATA: Observable/Javascript way to just returning the 
+// cells that match "metric" columns == "Drought", think there are better ways
+plot_df_in_ojs_filtered = plot_df_in_ojs_right.filter(data_row => {
+  return data_row.metric.includes(selected_metric)
+})
+```
+
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| error: false
+
+# library(htmltools)
+
+reactable_table <- (
+    reactable(
+        plot_df_in_r,
+        elementId = "tbl_left",
+        # searchable = TRUE,
+        defaultPageSize = 100,
+        defaultSorted = c("value"),
+        defaultSortOrder = "desc",
+        theme = reactableTheme(
+            headerStyle = list(
+                "&:hover[aria-sort]" = list(background = "#F5F4F3"),
+                "$aria-sort='ascending'], &[aria-sort='descending']" = list(background="#F4F3F3"),
+                borderColor = "#555"
+            ),
+            cellPadding = "4px",
+        ),
+        style=list(
+            fontFamily = "monospace",
+            fontSize = "0.7rem",
+            paddingTop = "1px",
+            paddingBottom = "1px"
+        ),
+        columns = list(
+            metric = colDef(
+                show=FALSE,
+                name="Metric",
+                minWidth=100
+            ),
+            "County Name" = colDef(
+                name="County",
+                filterable = TRUE,
+                # headerStyle = list(background="#fdae6b"),
+                minWidth=100
+            ),
+            GEOID = colDef(show=FALSE),
+            value = colDef(
+                name="Value",
+                maxWidth=130,
+                format = colFormat(digits = 1),
+                style = list(background="#fee6ce"),
+                headerStyle=list(background="#fdae6b"),
+            )
+        )
+    )
+)
+reactable_table
+```
+
+
+```{ojs}
+//| message: false
+//| warning: false
+//| echo: false
+//| error: false
+
+// Update R's reactable table 'tbl_left' data when filtered data changes
+Reactable.setData('tbl_left', plot_df_in_ojs_filtered)
+
+```
+
+:::
+
+::: {.column width="50%" margin="0.10em"}
+
+```{ojs}
+//| echo: false
+
+// Creates an Observable "viewof" for
+// 1) dropdown
+// 2) choropleth mapping
+// `selected_metric` above.
+
+// DROPDOWN: Observable Input dropdown menu, defaults to "Drought"
+viewof selected_metric_right = Inputs.select(metrics_list_in_r, {value: "EnviroScreen Score"})
+
+// CHOROPLETH MAP: Hardcoding the `transform` key to Vega's second array item [1]
+// First array items is [0] - the base ID-to-polygon mapping.
+// Alternative ideas welcome 
+viewof colorado_chloropleth_right = {
+    colorado_chloropleth_vl_right.transform[1].filter = `(datum.metric === '${selected_metric_right}')`
+    return embed(colorado_chloropleth_vl_right);
+}
+
+// For the Observable cell to register the data we use transpose() to retrieve
+// any compatible objects from R
+plot_df_in_ojs = transpose(plot_df_in_r)
+
+// FILTERING DATA: Observable/Javascript way to just returning the 
+// cells that match "metric" columns == "Drought", think there are better ways
+plot_df_in_ojs_filtered_right = plot_df_in_ojs.filter(data_row => {
+  return data_row.metric.includes(selected_metric_right)
+})
+```
+
+
+```{r}
+#| echo: false
+
+library(htmltools)
+
+# Conditional formatting in orange
+# orange_pal <- function(x) rgb(colorRamp(c("#ffe4cc", "#ffb54d"))(x), maxColorValue = 255)
+
+reactable_table <- (
+    reactable(
+        plot_df_in_r,
+        elementId = "tbl_right",
+        # searchable = TRUE,
+        defaultPageSize = 100,
+        defaultSorted = c("value"),
+        defaultSortOrder = "desc",
+        defaultExpanded = TRUE,
+        # groupBy = c("metric"),
+        theme = reactableTheme(
+            headerStyle = list(
+                "&:hover[aria-sort]" = list(background = "#F5F4F3"),
+                "$aria-sort='ascending'], &[aria-sort='descending']" = list(background="#F4F3F3"),
+                borderColor = "#555"
+            ),
+            cellPadding = "4px",
+        ),
+        style=list(
+            fontFamily = "monospace",
+            fontSize = "0.7rem",
+            marginLeft = "10px",
+            paddingTop = "1px",
+            paddingBottom = "1px"
+        ),
+        columns = list(
+            metric = colDef(
+                show=FALSE,
+                name="Metric",
+                minWidth=100
+            ),
+            "County Name" = colDef(
+                name="County",
+                filterable = TRUE,
+                minWidth=100
+            ),
+            GEOID = colDef(show=FALSE),
+            value = colDef(
+                name="Value",
+                maxWidth=130,
+                format = colFormat(digits = 1),
+                headerStyle=list(background="#45b8ff"),
+                style=list(background="#ddf2ff"),
+            )
+        )
+    )
+)
+reactable_table
+```
+
+
+```{ojs}
+//| message: false
+//| warning: false
+//| echo: false
+//| error: false
+
+// Update R's reactable table 'tbl_left' data when filtered data changes
+Reactable.setData('tbl_right', plot_df_in_ojs_filtered)
+
+```
+
+:::
+
+::::
