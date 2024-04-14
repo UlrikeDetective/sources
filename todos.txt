@@ -1,0 +1,5 @@
+<b>   TO DO TASKS FOR PLOTS </b>
+
+* Googlemaps
+* Openstreetmaps
+* Stadia
