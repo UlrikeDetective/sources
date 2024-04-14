@@ -12,7 +12,7 @@ editor: visual
 
 -   Once you have gotten your maps, you make a call with `ggmap()` much as you would with `ggplot()`
 
--   Let\'s do by example.
+-   Let's do by example.
 
 ### Sisquoctober
 
@@ -29,14 +29,14 @@ sisquoc
     # note that ggmap tends to use "lon" instead of "long" for longitude.
     ```
 
--   `ggmap` typically asks you for a zoom level, but we can try using `ggmap`\'s `make_bbox` function:
+-   `ggmap` typically asks you for a zoom level, but we can try using `ggmap`'s `make_bbox` function:
 
 ```{r}
 sbbox <- make_bbox(lon = sisquoc$lon, lat = sisquoc$lat, f = .1)
 sbbox
 ```
 
-Now, when we grab the map ggmap will try to fit it into that bounding box. Let\'s try:
+Now, when we grab the map ggmap will try to fit it into that bounding box. Let's try:
 
 ```{r}
 install.packages("ggmap")
@@ -89,7 +89,7 @@ ggmap(bikemap1) +
 
 -   See how we have mapped elevation to the color of the path using our rainbow colors again.
 
--   Note that getting the right zoom and position for the map is sort of trial and error. You can go to google maps to figure out where the center should be (right click and choose \"What\'s here?\" to get the lat-long of any point. )
+-   Note that getting the right zoom and position for the map is sort of trial and error. You can go to google maps to figure out where the center should be (right click and choose "What's here?" to get the lat-long of any point. )
 
 -   The `make_bbox` function has never really worked for me.
 
@@ -97,7 +97,7 @@ ggmap(bikemap1) +
 
 For this, I have whittled down some stuff in the coded wire tag data base to georeferenced marine locations in British Columbia where at least one Chinook salmon was recovered in between 2000 and 2012 inclusive. To see how I did all that you can check out [this](https://github.com/eriqande/pbt-feasibility/blob/4ea2fc960f74f66b5ec3a11c107cdc52bfb346dc/Rmd/02-02-explore-recovery-and-catch-sample-data.Rmd#looking-at-locations-of-location-codes)
 
-Let\'s have a look at the data:
+Let's have a look at the data:
 
 ```{r}
 bc <- readRDS("/data/bc_sites.rds")
@@ -108,11 +108,11 @@ So, we have 1,113 points to play with.
 
 #### What do we hope to learn?
 
--   These locations in BC are hierarchically structured. I am basically interested in how close together sites in the same \"region\" or \"area\" or \"sector\" are, and pondering whether it is OK to aggregate fish recoveries at a certain level for the purposes of getting a better overall estimate of the proportion of fish from different hatcheries in these areas.
+-   These locations in BC are hierarchically structured. I am basically interested in how close together sites in the same "region" or "area" or "sector" are, and pondering whether it is OK to aggregate fish recoveries at a certain level for the purposes of getting a better overall estimate of the proportion of fish from different hatcheries in these areas.
 
 -   So, pretty simple stuff. I just want to plot these points on a map, and paint them a different color according to their sector, region, area, etc.
 
--   Let\'s just enumerate things first, using `dplyr`:
+-   Let's just enumerate things first, using `dplyr`:
 
     ```{r}
     library(dplyr)
@@ -126,12 +126,11 @@ So, we have 1,113 points to play with.
 
     ```
 
-```{=html}
 <!-- -->
-```
+
 -   That looks good. It appears like we could probably color code over the whole area down to region, and then down to area within subregions.
 
-#### Makin\' a map.
+#### Makin' a map.
 
 -   Let us try again to use `make_bbox()` to see if it will work better when used on a large scale.
 
@@ -175,9 +174,9 @@ ggmap(bc_big) +
 
 -   I want to make series of maps. One for each region, in which the the areas in that region are colored differently.
 
--   How? Let\'s make a function: you pass it the region and it makes the plot.
+-   How? Let's make a function: you pass it the region and it makes the plot.
 
--   Keep in mind that there are no factors in this data frame so we don\'t have to worry about dropping levels, etc.
+-   Keep in mind that there are no factors in this data frame so we don't have to worry about dropping levels, etc.
 
     ```{r}
     region_plot <- function(MyRegion) {

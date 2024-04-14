@@ -27,11 +27,14 @@ To use R and python together, need to load python via `reticulate` R libaries to
 #| message: false
 #| warning: false
 #| echo: false
+# install.packages("reticulate")
+# install.packages("reactable")
+# install.packages("htmltools")
 library(reticulate)
 library(reactable)
 library(htmltools)
 
-reticulate::use_virtualenv('/Users/jung/Projects/quarto_tutorial/.venv/')
+reticulate::use_virtualenv('/Users/ulrike_imac_air/projects/myenv')
 
 ```
 
@@ -49,6 +52,16 @@ from vega_datasets import data
 
 alt.data_transformers.disable_max_rows()
 
+Show in New Window
+
+DataTransformerRegistry.enable('default')
+
+```
+
+
+
+```{r}
+
 
 raw_data = (pl.read_csv("data/County_data.csv", null_values="NA"))
 raw_data_pandas = raw_data.select(~cs.contains("Percentile")).to_pandas()
@@ -63,7 +76,10 @@ colorado_enviro = (raw_data
         "AQCC Reg 3 Disproportionately Impacted Community"
     )
 )
+```
 
+
+```{r}
 colorado_enviro_pandas = colorado_enviro.to_pandas()
 
 plot_df = (
@@ -95,6 +111,11 @@ plot_df = (
 # reticulate only supports pandas df transfer right now
 plot_df_pandas = plot_df.fill_null(0).to_pandas()
 
+```
+
+
+
+```{r}
 # Admittedly mark_geoshape() is not the most intuitive function
 # `counties`` data is a GeoJSON that contains 
 # shapefiles (polygon information for county/state)
@@ -134,9 +155,7 @@ state_zoom_json = state_zoom.to_json()
 metrics_list = sorted(plot_df.select("metric").unique().to_series().to_list())
 
 state_zoom
-
 ```
-
 
 ## Transfering data across Quarto cells
 Quarto does have some functions in development to transfer data across languages
@@ -148,6 +167,8 @@ Transferring anything from python side transfer is the most problems, and the on
 
 Reticulate issues:
 - Feature request: Support Polars DataFrames https://github.com/rstudio/reticulate/issues/1319
+
+
 
 
 ```{r}
@@ -166,7 +187,6 @@ ojs_define(colorado_enviro_in_r)
 ojs_define(raw_data_in_r)
 ojs_define(state_zoom_json_in_r)
 ```
-
 
 
 ## The Forbidden Symphony 

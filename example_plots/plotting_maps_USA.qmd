@@ -18,7 +18,8 @@ Prerequisites You are going to need to install a few extra packages to follow al
 
 # the github version of ggmap, which recently pulled in a small fix I had
 # for a bug 
-devtools::install_github("dkahle/ggmap")
+
+# devtools::install_github("dkahle/ggmap")
 ```
 
 ### Load up a few of the libraries we will use
@@ -271,7 +272,7 @@ ca_base + theme_nothing() +
     library(stringr)
 
     # Check if the file exists
-    file_path <- "/data/ca-counties.csv"
+    file_path <- "/Users/ulrike_imac_air/projects/R_themes/example_plots/data/ca-counties.csv"
     if (!file.exists(file_path)) {
       stop("The file does not exist at the specified path.")
     }
