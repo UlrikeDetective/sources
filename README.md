@@ -26,8 +26,8 @@ learning R and doing experiements with data analytics
 This project is licensed under the GNU General Public License v3.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## Badges
-[![GitHub stars](https://img.shields.io/github/stars/UlrikeDetective/source)](https://github.com/UlrikeDetective/source/stargazers) [![GitHub forks](https://img.shields.io/github/forks/UlrikeDetective/source)](https://github.com/UlrikeDetective/source/network/members) [![GitHub issues](https://img.shields.io/github/issues/UlrikeDetective/source)](https://github.com/UlrikeDetective/source/issues) [![GitHub license](https://img.shields.io/github/license/UlrikeDetective/source)](https://github.com/UlrikeDetective/source/blob/master/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/UlrikeDetective/sources)](https://github.com/UlrikeDetective/sources/stargazers) [![GitHub forks](https://img.shields.io/github/forks/UlrikeDetective/sources)](https://github.com/UlrikeDetective/sources/network/members) [![GitHub issues](https://img.shields.io/github/issues/UlrikeDetective/sources)](https://github.com/UlrikeDetective/sources/issues) [![GitHub license](https://img.shields.io/github/license/UlrikeDetective/sources)](https://github.com/UlrikeDetective/sources/blob/master/LICENSE)
 
 ## GitHub Repository
-[Link to GitHub repository](https://github.com/UlrikeDetective/source)
+[Link to GitHub repository](https://github.com/UlrikeDetective/sources)
 
