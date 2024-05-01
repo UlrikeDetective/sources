@@ -2,6 +2,8 @@
 
 ![head_picture](https://github.com/UlrikeDetective/sources/blob/main/icons/head.png)
 
+The repo contains many examples and example charts for data visualizations. 
+Helping your data insights with visualization on the next level.
 
 ### Table of Contents
 - [Custom_visualization](https://github.com/UlrikeDetective/sources/tree/main/custom_visualization)
@@ -17,7 +19,7 @@ mostly R
 ```
 ## Usage
 ```
-learning R and doing experiements with data analytics
+Learning about data visualization with R
 ```
 ## Contributors
 
