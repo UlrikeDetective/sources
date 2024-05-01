@@ -1,6 +1,6 @@
 ## Learning about visualisation, plots and graphs </h1>
 
-![head_picture](https://github.com/UlrikeDetective/tech_layoffs/blob/main/tech_layoffs_pictures/tech_layoffs.png)
+![head_picture](https://github.com/UlrikeDetective/sources/blob/main/icons/head.png)
 
 
 ### Table of Contents
