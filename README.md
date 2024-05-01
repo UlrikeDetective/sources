@@ -4,11 +4,11 @@
 
 
 ### Table of Contents
-- [Custom_visualization](https://github.com/UlrikeDetective/tech_layoffs/tree/main/tech_layoffs_analysis)
-- [Dashboards](https://github.com/UlrikeDetective/tech_layoffs/tree/main/tech_layoffs_csv)
-- [Example_plots](https://github.com/UlrikeDetective/tech_layoffs/tree/main/tech_layoffs_txt)
-- [Examples](https://github.com/UlrikeDetective/tech_layoffs/tree/main/tech_layoffs_pictures)
-- [Icons](https://github.com/UlrikeDetective/tech_layoffs/tree/main/tech_layoffs_pictures)
+- [Custom_visualization](https://github.com/UlrikeDetective/sources/tree/main/custom_visualization)
+- [Dashboards](https://github.com/UlrikeDetective/sources/tree/main/dashboards)
+- [Example_plots](https://github.com/UlrikeDetective/sources/tree/main/example_plots)
+- [Examples](https://github.com/UlrikeDetective/sources/tree/main/examples)
+- [Icons](https://github.com/UlrikeDetective/sources/tree/main/icons)
 
 ## Installation
 
