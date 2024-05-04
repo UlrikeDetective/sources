@@ -1,0 +1,92 @@
+---
+title: "Intro_GIS"
+author: "Ulrike Herold"
+date: "2024-05-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Intro into GIS
+
+Mastering R for GIS: A Guide for GIS Professionals.
+
+```{r}
+install.packages("sf")  # Install the sf package for working with spatial data
+library(sf) 
+```
+
+## Example shapefile
+
+```{r pressure, echo=FALSE}
+# Set your working directory to where your shapefile is located
+setwd("/Users/ulrike_imac_air/projects/R_themes/GIS/data/HistoricZoningDistricts2008_20240504")
+
+# Load a shapefile using the sf package
+shapefile <- st_read("geo_export_5edd6cf5-1c8c-4f91-8036-724d70bd4eae.shp")
+
+# View the structure of the loaded shapefile
+print(shapefile)
+```
+
+
+
+```{r}
+plot(shapefile)
+```
+
+```{r}
+# View the attributes of the shapefile
+head(shapefile)
+
+# View the summary statistics of the shapefile
+summary(shapefile)
+
+# Check the structure of the shapefile
+str(shapefile)
+```
+Getting coordinates
+
+```{r}
+# Extract the coordinates of the vertices
+coordinates <- st_coordinates(shapefile)
+
+# View the first few rows of the coordinates
+head(coordinates)
+```
+
+How to read a geotiff (image).
+
+```{r}
+install.packages("raster")
+```
+
+
+```{r}
+# Load the raster package
+library(raster)
+
+# Set your working directory to where your GeoTIFF file is located
+setwd("/Users/ulrike_imac_air/projects/R_themes/GIS/data/PlanetDEM_1s_3s_SanFrancisco")
+
+# Read the GeoTIFF file
+raster_data <- raster("PlanetDEM_1s_SanFrancisco.tif")
+
+# Print information about the raster
+print(raster_data)
+
+# Plot the raster
+plot(raster_data)
+```
+
+Export a geotiff.
+```{r}
+# Set the filename for the output GeoTIFF
+output_filename <- "output_file.tif"
+
+# Write the raster data to a GeoTIFF file
+writeRaster(raster_data, filename = output_filename, format = "GTiff", overwrite = TRUE)
+```
+
