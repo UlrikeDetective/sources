@@ -6,6 +6,7 @@ The repo contains many examples and example charts for data visualizations.
 Helping your data insights with visualization on the next level.
 
 ### Table of Contents
+- [GIS Intro](https://github.com/UlrikeDetective/sources/tree/main/gis)
 - [Custom_visualization](https://github.com/UlrikeDetective/sources/tree/main/custom_visualization)
 - [Dashboards](https://github.com/UlrikeDetective/sources/tree/main/dashboards)
 - [Example_plots](https://github.com/UlrikeDetective/sources/tree/main/example_plots)
