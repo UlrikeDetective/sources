@@ -1,0 +1,490 @@
+---
+title: "R_Hightcharts_tutorial"
+author: "Ulrike Herold"
+date: "2024-05-12"
+output: html_document
+---
+R hightchart tutorial
+
+```{r setup, include=FALSE}
+install.packages(c("dplyr", "gapminder", "highcharter"))
+```
+
+Libaries
+
+```{r}
+library(dplyr)
+library(highcharter)
+library(gapminder)
+```
+
+## Your First R Highcharts Plot
+We'll begin by plotting the simplest column chart you can imagine. The gapminder dataset isn't in the optimal format for visualization out of the box, but we can get it there with a touch of dplyr magic. The following code snippet will calculate the average life expectancy per continent and arrange it in descending order:
+```{r}
+head(gapminder)
+
+```
+
+
+```{r, echo=FALSE}
+avg_le_continent <- gapminder %>%
+  group_by(continent) %>%
+  summarise(AvgLifeExp = round(mean(lifeExp), 1)) %>%
+  arrange(desc(AvgLifeExp))
+avg_le_continent
+```
+
+Now that looks like something we can easily visualize. R Highcharts wants you to use the hchart() function to pass in the data frame, chart type, and chart aesthetics. These are minimum requirements for any chart, but you can add much, much more.
+
+For example, we can construct a column chart with the continent shown on X-axis, and average life expectancy on Y-axis:
+```{r}
+hchart(
+  avg_le_continent,
+  "column",
+  hcaes(x = continent, y = AvgLifeExp)
+)
+```
+One line of R code (if you don't mind condensing the code), and you already have a decent-looking interactive visualization. Let's make it better.
+
+## Basic Styling
+There are two things we'll address here. First, the default bar color looks fine, but we want to add more personality to the chart, so we'll change it to Appsilon blue. Second, you might have noticed that hovering over individual columns shows the name as "Series 1". That's easy to fix.
+
+The following code snippet plots the same chart, but with changed color and corrected series name:
+```{r}
+hchart(
+  avg_le_continent,
+  "column",
+  hcaes(x = continent, y = AvgLifeExp),
+  color = "#0198f9",
+  name = "Average life expectancy"
+)
+```
+
+That does it for the fundamentals, but what about other common plot attributes, such as title and axis labels? Let's go over these next.
+
+## Adding Chart Elements
+
+R Highcharter uses a special syntax for chaining multiple function calls - |>. You might be used to %>% if you've been working with dplyr and ggplot2 a lot, so this difference is worth pointing out.
+
+As for function chaining, you want to do it to take maximum control over your visualization. For example, it allows you to add title, subtitle, credits, axis labels, and change the overall theme.
+
+Take a look for yourself:
+```{r}
+hchart(avg_le_continent, "column", hcaes(x = continent, y = AvgLifeExp), color = "#0198f9", name = "Average life expectancy") |>
+  hc_title(text = "Average life expectancy per continent") |>
+  hc_subtitle(text = "Source: Gapminder dataset") |>
+  hc_credits(text = "appsilon.com", enabled = TRUE) |>
+  hc_xAxis(title = list(text = "Continent")) |>
+  hc_yAxis(title = list(text = "Average life expectancy")) |>
+  hc_add_theme(hc_theme_smpl())
+```
+The chart now looks much more production-ready. It contains all the information needed so that everyone can take a quick look at your chart and immediately know what it's about.
+
+If you're interested, you can find more theme options on the Highcharter official documentation page.
+
+We've only explored column charts so far, and Highcharts has a lot more to offer. Let's explore some alternative visualization types next.
+
+## Exploring Different Chart Types in Highcharts
+
+This section will walk you through creating the most common data visualization types - scatter plots, line charts, histograms, and pie charts. Alongside column charts you're already familiar with, these combined will allow you to make 90% of the applications and dashboards you're using.
+
+We'll first show you both how to make single and multiple scatter plots. The logic of including multiple series into a single chart is transferable, so you'll easily be able to produce multiple line plots, stacked bar charts, and similar.
+
+### Scatter Plots
+The subset we've worked with so far won't make the cut here. We need fewer data points.
+
+The avg_le_europe data frame will display average life expectancy in Europe grouped by year:
+```{r}
+avg_le_europe <- gapminder %>%
+  filter(continent == "Europe") %>%
+  group_by(year) %>%
+  summarise(AvgLifeExp = round(mean(lifeExp), 1))
+avg_le_europe
+```
+This should be easy enough to visualize. You can copy the code from the column chart and change the second argument to "point". Highchart still uses X and Y axis values to construct the chart, so the rest of the code should look familiar.
+
+We've tweaked the bubble color just to make things a bit different:
+
+```{r}
+hchart(avg_le_europe, "point", hcaes(x = year, y = AvgLifeExp), color = "#800000") |>
+  hc_title(text = "Average life expectancy in Europe") |>
+  hc_xAxis(title = list(text = "Year")) |>
+  hc_yAxis(title = list(text = "Average life expectancy"))
+```
+
+And now you have a scatter plot! But what if your dataset includes multiple categories for the same variable? That's where multiple scatter plots shine.
+
+## Multiple Scatter Plot
+
+In plain English, a multiple scatter plot allows you to plot multiple categories of the same variable. You'll see what this means in practice, but first, we need a bigger dataset. Let's also include Asia into the mix:
+
+```{r}
+avg_le_europe_asia <- gapminder %>%
+  filter(continent %in% c("Europe", "Asia")) %>%
+  group_by(continent, year) %>%
+  summarise(AvgLifeExp = round(mean(lifeExp), 1))
+avg_le_europe_asia
+```
+Now we have two continents, each with exactly the same number of data points for our Y variable.
+
+In R Highcharter, you can specify the additional group argument in hcaes() to declare which dataset variable will contain the groups. Here, we're also using hc_colors() to manually control bubble color for every group:
+```{r}
+hchart(avg_le_europe_asia, "point", hcaes(x = year, y = AvgLifeExp, group = continent)) |>
+  hc_title(text = "Average life expectancy in Europe and Asia") |>
+  hc_xAxis(title = list(text = "Year")) |>
+  hc_yAxis(title = list(text = "Average life expectancy")) |>
+  hc_colors(c("#0198f9", "#800000"))
+```
+
+## Line Charts
+
+In essence, a line chart conveys the same information as a scatter plot, but individual data points aren't separated - they're connected by a line instead.
+
+That simplicity is carried to Highcharts' syntax, as you can simply swap "point" for "line" to transform a scatter plot into a line chart. Let's see it in action:
+```{r}
+hchart(avg_le_europe_asia, "line", hcaes(x = year, y = AvgLifeExp, group = continent)) |>
+  hc_title(text = "Average life expectancy in Europe and Asia") |>
+  hc_xAxis(title = list(text = "Year")) |>
+  hc_yAxis(title = list(text = "Average life expectancy")) |>
+  hc_colors(c("#0198f9", "#800000"))
+```
+
+The above code is identical to the one written in the Multiple scatter plot section, with just the chart type being changed. That's the beauty of high-level R packages.
+
+## Histograms
+Let's now take a look at yet another commonly used visualization type - histograms. Unlike the previous chart types, this one needs only one variable since the goal is to visualize the distribution. You don't need to pass in chart type argument here, just make sure to point to a specific column. Highcharts will take care of the rest.
+
+The functions you see chained are nothing not seen before:
+
+```{r}
+hchart(gapminder$lifeExp, name = "Life expectancy", color = "#800000") %>%
+  hc_title(text = "Average life expectancy histogram") |>
+  hc_xAxis(title = list(text = "Life expectancy")) |>
+  hc_yAxis(title = list(text = "Count"))
+```
+
+We didn't create a custom dataset here to isolate only the most recent year. That's why we're getting these crazy low life expectancies. Give it a try yourself for extra practice points.
+
+## Pie Charts
+And finally, let's take a look at pie charts. They aren't so common nowadays, especially if the app/dashboard/report was constructed by a data professional, rather than a business user.
+
+Nevertheless, it can't hurt to know it! We'll extract population data for three countries in 2007:
+
+```{r}
+population <- gapminder %>%
+  filter(country %in% c("Germany", "France", "Spain", "Italy", "Portugal")) %>%
+  filter(year == 2007)
+population
+```
+You can now use the "pie" chart type to show country on the X-axis and population on the Y-axis:
+```{r}
+hchart(population, "pie", hcaes(name = country, y = pop)) |>
+  hc_title(text = "Population pie chart") %>%
+  hc_colors(c("#0198f9", "#f2aa98", "#ffcc33", "#973998", "#a9d2cc"))
+```
+
+This concludes a rather long section on basic chart types available in R Highcharts. Up next, we'll go over a somewhat more advanced use case of custom-tweaking the tooltip.
+
+## Advanced R Highcharts: Tweaking the Tooltip with JavaScript
+
+As you've probably noticed, Highcharts visualizations are interactive by default. They also provide a good-looking tooltip when hovering over individual bars, bubbles, lines, or pie segments.
+
+What we haven't discussed yet is tooltip customization. This will require writing an inline JavaScript function that has access to chart elements.
+
+For demonstration, we'll dial back to the column chart from the first section. Our goal now is to append "years" at the end of the tooltip value. This makes sense because the average life expectancy value is shown by default. By appending custom text, we essentially give more information to the user.
+
+You can use the hc_tooltip() function for the job. The most convenient way is to pass in an inline JavaScript function and access chart properties, such as this.y, and then manually append any text you want to it:
+```{r}
+hchart(avg_le_continent, "column", hcaes(x = continent, y = AvgLifeExp), color = "#0198f9", name = "Average life expectancy") |>
+  hc_title(text = "Average life expectancy per continent") |>
+  hc_xAxis(title = list(text = "Continent")) |>
+  hc_yAxis(title = list(text = "Average life expectancy")) |>
+  hc_tooltip(formatter = JS("function(){return this.y + ' years';}"))
+```
+
+We now have the information needed, but everything that was visible by default is gone! Maybe you didn't want that, so let's see how to get it back.
+
+You would assume that this.x would return the value of the X-axis for a given column, but that's not the case. It will return a range instead. Further, we'll also include more textual info to fully inform the user what's going on:
+
+```{r}
+hchart(avg_le_continent, "column", hcaes(x = continent, y = AvgLifeExp), color = "#0198f9", name = "Average life expectancy") |>
+  hc_title(text = "Average life expectancy per continent") |>
+  hc_xAxis(title = list(text = "Continent")) |>
+  hc_yAxis(title = list(text = "Average life expectancy")) |>
+  hc_tooltip(formatter = JS("function(){return '<b>Continent: ' + this.point.name + '</b><br>Average life expectancy: ' + this.y + ' years';}"))
+```
+
+```{r}
+library(highcharter)
+library(dplyr)
+
+data(diamonds, package = "ggplot2")
+
+data <- count(diamonds, cut, color)
+
+hc <- hchart(data, "column", hcaes(x = color, y = n, group = cut)) |>
+  hc_yAxis(title = list(text = "Cases")) |>
+  hc_title(text = "Diamonds Are Forever") |>
+  hc_subtitle(text = "Source: Diamonds data set") |>
+  hc_credits(enabled = TRUE, text = "http://jkunst.com/highcharter/") |>
+  hc_tooltip(sort = TRUE, table = TRUE) |> 
+  hc_caption(text = "This is a caption text to show the style of this type of text") %>%
+  hc_colors(c("#0198f9", "#f2aa98", "#ffcc33", "#973998", "#a9d2cc"))
+
+hc
+```
+
+## different themes
+```{r}
+data <- count(diamonds, cut, color)
+
+hc <- hchart(data, "column", hcaes(x = color, y = n, group = cut)) |>
+  hc_yAxis(title = list(text = "Cases")) |>
+  hc_title(text = "Diamonds Are Forever") |>
+  hc_subtitle(text = "Source: Diamonds data set") |>
+  hc_credits(enabled = TRUE, text = "http://jkunst.com/highcharter/") |>
+  hc_tooltip(sort = TRUE, table = TRUE) |> 
+  hc_caption(text = "This is a caption text to show the style of this type of text") %>%
+  hc_colors(c("#0198f9", "#f2aa98", "#ffcc33", "#973998", "#a9d2cc")) %>% 
+  hc_add_theme(hc_theme_darkunica())
+
+hc
+
+```
+
+```{r}
+data <- count(diamonds, cut, color)
+
+hc <- hchart(data, "column", hcaes(x = color, y = n, group = cut)) |>
+  hc_yAxis(title = list(text = "Cases")) |>
+  hc_title(text = "Diamonds Are Forever") |>
+  hc_subtitle(text = "Source: Diamonds data set") |>
+  hc_credits(enabled = TRUE, text = "http://jkunst.com/highcharter/") |>
+  hc_tooltip(sort = TRUE, table = TRUE) |> 
+  hc_caption(text = "This is a caption text to show the style of this type of text") %>%
+  hc_colors(c("#0198f9", "#f2aa98", "#ffcc33", "#973998", "#a9d2cc")) %>% 
+  hc_add_theme(hc_theme_bloom())
+
+hc
+```
+
+```{r}
+data <- count(diamonds, cut, color)
+
+hc <- hchart(data, "column", hcaes(x = color, y = n, group = cut)) |>
+  hc_yAxis(title = list(text = "Cases")) |>
+  hc_title(text = "Diamonds Are Forever") |>
+  hc_subtitle(text = "Source: Diamonds data set") |>
+  hc_credits(enabled = TRUE, text = "http://jkunst.com/highcharter/") |>
+  hc_tooltip(sort = TRUE, table = TRUE) |> 
+  hc_caption(text = "This is a caption text to show the style of this type of text") %>%
+  hc_colors(c("#0198f9", "#f2aa98", "#ffcc33", "#973998", "#a9d2cc")) %>% 
+  hc_add_theme(hc_theme_chalk())
+
+hc
+```
+
+```{r}
+data <- count(diamonds, cut, color)
+
+hc <- hchart(data, "column", hcaes(x = color, y = n, group = cut)) |>
+  hc_yAxis(title = list(text = "Cases")) |>
+  hc_title(text = "Diamonds Are Forever") |>
+  hc_subtitle(text = "Source: Diamonds data set") |>
+  hc_credits(enabled = TRUE, text = "http://jkunst.com/highcharter/") |>
+  hc_tooltip(sort = TRUE, table = TRUE) |> 
+  hc_caption(text = "This is a caption text to show the style of this type of text") %>%
+  hc_colors(c("#0198f9", "#f2aa98", "#ffcc33", "#973998", "#a9d2cc")) %>% 
+  hc_add_theme(hc_theme_economist())
+
+hc
+```
+
+```{r}
+data <- count(diamonds, cut, color)
+
+hc <- hchart(data, "column", hcaes(x = color, y = n, group = cut)) |>
+  hc_yAxis(title = list(text = "Cases")) |>
+  hc_title(text = "Diamonds Are Forever") |>
+  hc_subtitle(text = "Source: Diamonds data set") |>
+  hc_credits(enabled = TRUE, text = "http://jkunst.com/highcharter/") |>
+  hc_tooltip(sort = TRUE, table = TRUE) |> 
+  hc_caption(text = "This is a caption text to show the style of this type of text") %>%
+  hc_colors(c("#0198f9", "#f2aa98", "#ffcc33", "#973998", "#a9d2cc")) %>% 
+  hc_add_theme(hc_theme_ffx())
+
+hc
+```
+
+```{r}
+data <- count(diamonds, cut, color)
+
+hc <- hchart(data, "column", hcaes(x = color, y = n, group = cut)) |>
+  hc_yAxis(title = list(text = "Cases")) |>
+  hc_title(text = "Diamonds Are Forever") |>
+  hc_subtitle(text = "Source: Diamonds data set") |>
+  hc_credits(enabled = TRUE, text = "http://jkunst.com/highcharter/") |>
+  hc_tooltip(sort = TRUE, table = TRUE) |> 
+  hc_caption(text = "This is a caption text to show the style of this type of text") %>%
+  hc_colors(c("#0198f9", "#f2aa98", "#ffcc33", "#973998", "#a9d2cc")) %>% 
+  hc_add_theme(hc_theme_ft())
+
+hc
+```
+
+```{r}
+data <- count(diamonds, cut, color)
+
+hc <- hchart(data, "column", hcaes(x = color, y = n, group = cut)) |>
+  hc_yAxis(title = list(text = "Cases")) |>
+  hc_title(text = "Diamonds Are Forever") |>
+  hc_subtitle(text = "Source: Diamonds data set") |>
+  hc_credits(enabled = TRUE, text = "http://jkunst.com/highcharter/") |>
+  hc_tooltip(sort = TRUE, table = TRUE) |> 
+  hc_caption(text = "This is a caption text to show the style of this type of text") %>%
+  hc_add_theme(hc_theme_google())
+
+hc
+```
+
+```{r}
+data <- count(diamonds, cut, color)
+
+hc <- hchart(data, "column", hcaes(x = color, y = n, group = cut)) |>
+  hc_yAxis(title = list(text = "Cases")) |>
+  hc_title(text = "Diamonds Are Forever") |>
+  hc_subtitle(text = "Source: Diamonds data set") |>
+  hc_credits(enabled = TRUE, text = "http://jkunst.com/highcharter/") |>
+  hc_tooltip(sort = TRUE, table = TRUE) |> 
+  hc_caption(text = "This is a caption text to show the style of this type of text") %>%
+  hc_add_theme(hc_theme_gridlight())
+
+hc
+```
+
+```{r}
+data <- count(diamonds, cut, color)
+
+hc <- hchart(data, "column", hcaes(x = color, y = n, group = cut)) |>
+  hc_yAxis(title = list(text = "Cases")) |>
+  hc_title(text = "Diamonds Are Forever") |>
+  hc_subtitle(text = "Source: Diamonds data set") |>
+  hc_credits(enabled = TRUE, text = "http://jkunst.com/highcharter/") |>
+  hc_tooltip(sort = TRUE, table = TRUE) |> 
+  hc_caption(text = "This is a caption text to show the style of this type of text") %>%
+  hc_add_theme(hc_theme_handdrawn())
+
+hc
+```
+
+##Creating themes
+You can create your own themes!
+
+```{r}
+my_own_theme <- hc_theme(
+  colors = c("#927397", "#D6809c", "#E7CBAE", "#FAF5EF", "#7F7F7F"),
+  chart = list(
+    backgroundColor = NULL,
+    divBackgroundImage = "https://www.google.com/url?sa=i&url=https%3A%2F%2Fgiphy.com%2Fstickers%2Fboho-naomigoffdesign-naomigoff-oufAAMYax5H78kCDQR&psig=AOvVaw137w-fdyiNMKe9VqsS3dnG&ust=1715618728766000&source=images&cd=vfe&opi=89978449&ved=2ahUKEwj7lrr4x4iGAxXmZPEDHVQvA2UQjRx6BAgAEBU"
+  ),
+  title = list(
+    style = list(
+      color = "#333333",
+      fontFamily = "Lato"
+    )
+  ),
+  subtitle = list(
+    style = list(
+      color = "#3a3b3b",
+      fontFamily = "Shadows Into Light"
+    )
+  ),
+  legend = list(
+    itemStyle = list(
+      fontFamily = "Tangerine",
+      color = "black"
+    ),
+    itemHoverStyle = list(
+      color = "#3a3b3b"
+    )
+  )
+)
+
+hc |>
+  hc_add_theme(my_own_theme)
+```
+
+```{r}
+my_own_theme <- hc_theme(
+  colors = c("#927397", "#D6809c", "#E7CBAE", "#FAF5EF", "#7F7F7F"),
+  chart = list(
+    backgroundColor = NULL,
+    divBackgroundImage ="/Users/ulrike_imac_air/Downloads/giphy.gif"),
+  title = list(
+    style = list(
+      color = "#333333",
+      fontFamily = "Lato"
+    )
+  ),
+  subtitle = list(
+    style = list(
+      color = "#3a3b3b",
+      fontFamily = "Shadows Into Light"
+    )
+  ),
+  legend = list(
+    itemStyle = list(
+      fontFamily = "Tangerine",
+      color = "black"
+    ),
+    itemHoverStyle = list(
+      color = "#3a3b3b"
+    )
+  )
+)
+
+hc |>
+  hc_add_theme(my_own_theme)
+```
+Merge Themes
+You can merge themes too.
+
+```{r}
+thm <- hc_theme_merge(
+  hc_theme_google(),
+  hc_theme(
+    chart = list(
+      backgroundColor = "transparent",
+      divBackgroundImage = "http://www.wired.com/images_blogs/underwire/2013/02/xwing-bg.gif"
+    ),
+    title = list(
+      style = list(
+        color = "white",
+        fontFamily = "Griffy",
+        fontSize = "25px"
+      )
+    ),
+    subtitle = list(
+      style = list(
+        color = "white",
+        fontFamily = "Poetsen One",
+        fontSize = "20px"
+      )
+    ),
+    legend = list(
+      itemStyle = list(
+        fontFamily = "Poppins",
+        color = "white"
+      ),
+      itemHoverStyle = list(
+        color = "white"
+      )
+    )
+  )
+)
+
+
+hc |>
+  hc_add_theme(thm)
+```
+
