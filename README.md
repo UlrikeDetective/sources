@@ -23,7 +23,13 @@ Learning about data visualization with R and Python
 [![My Skills](https://skillicons.dev/icons?i=py,r&theme=light)](https://skillicons.dev)
 
 
-## Contributors
+### Tasks for the repo
+- [x] having fun with Data visualization
+- [ ] improving my coding skills
+- [ ] improving data visualization
+- [ ] getting started with dashboards
+- [ ] publish work
+- [ ] Add delight to the experience when all tasks are complete :tada:
 
 
 ## License
