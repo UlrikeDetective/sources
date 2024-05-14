@@ -3,3 +3,5 @@
 * Googlemaps
 * Openstreetmaps
 * Stadia
+
+* tutorials highcharts
