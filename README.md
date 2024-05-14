@@ -13,15 +13,16 @@ Helping your data insights with visualization on the next level.
 - [Examples](https://github.com/UlrikeDetective/sources/tree/main/examples)
 - [Icons](https://github.com/UlrikeDetective/sources/tree/main/icons)
 
-## Installation
 
-```
-mostly R
-```
 ## Usage
-```
-Learning about data visualization with R
-```
+
+Learning about data visualization with R and Python
+
+## Some tools I use:
+
+[![My Skills](https://skillicons.dev/icons?i=py,r&theme=light)](https://skillicons.dev)
+
+
 ## Contributors
 
 
