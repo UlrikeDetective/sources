@@ -41,3 +41,4 @@ This project is licensed under the GNU General Public License v3.0 License - see
 ## GitHub Repository
 [Link to GitHub repository](https://github.com/UlrikeDetective/sources)
 
+[![Readme Quotes](https://quotes-github-readme.vercel.app/api?type=horizontal&theme=tokyonight&type=vertical)](https://github.com/piyushsuthar/github-readme-quotes)
