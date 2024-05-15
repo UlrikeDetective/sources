@@ -29,7 +29,7 @@ library(highcharter)
 ## Data
 
 ```{r data}
-sales <- read.csv2("/Users/ulrike_imac_air/projects/R_themes/examples/data.csv")
+sales <- read.csv2("data.csv")
 sales
 ```
 
