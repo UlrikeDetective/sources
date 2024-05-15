@@ -18,7 +18,7 @@ library(highcharter)
 library(gapminder)
 ```
 
-## Your First R Highcharts Plot
+# Your First R Highcharts Plot
 We'll begin by plotting the simplest column chart you can imagine. The gapminder dataset isn't in the optimal format for visualization out of the box, but we can get it there with a touch of dplyr magic. The following code snippet will calculate the average life expectancy per continent and arrange it in descending order:
 ```{r}
 head(gapminder)
