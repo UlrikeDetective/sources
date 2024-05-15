@@ -1,0 +1,211 @@
+---
+title: "R Shiny Highcharts"
+output: html_notebook
+---
+
+# R Shiny Highcharts – How to Create Interactive and Animated Shiny Dashboards
+
+Exploring R Shiny Highcharts Dashboard Elements
+The application we’re about to create will contain a couple of elements, so it’s a good idea to explain what’s where and what does what. It will be based on the Gapminder datatset, and will show information such as life expectancy, population, and GDP per continent, year, and country.
+
+
+As you can see, the application starts with a couple of filters. These allow the user to control the continent and start/end years. Not all values and charts will be affected by the year filters, as some of them will show only the most recent values (2007).
+
+In the Latest stats section, you’ll see four boxes showing information on the number of countries and other various statistics for a given continent. The year filters won’t do anything to these boxes, as only the most recent values will be shown.
+
+Below, we have two Summary stats charts. These will be a bar chart showing median life expectancy by year, and a line chart showing population by year. These two are affected by both the continent and year filter values. It’s also worth noting that they show an average across all countries in a continent, so some degree of skew is to be expected.
+
+And finally, we have the Drilldown section. It contains only one chart which shows the most recent population across the country for a given continent. When you click on an individual bar, you’ll see the population stats across years only for the given country. Neat!
+
+Let’s start building the thing!
+
+Building the R Shiny Highcharts Dashboard
+This section will be quite code-intensive and will require fundamental R Shiny knowledge. If you’re a complete beginner, we recommend checking our library of Shiny articles first.
+
+Let’s start with the easiest part – summary stats.
+
+Summary Stats Cards
+Truth be told, filters and summary stats have nothing to do with R Highcharts, but will take our dashboard to the next level. As mentioned before, we’re working with the Gapminder dataset, and the idea is to allow the user to select a continent and a year range from which the dashboard contents will get updated.
+
+The Shiny app’s UI is divided into two parts – sidebarPanel() and mainPanel(). The first one contains all UI controls (filters), while the second one renders the contents.
+
+Regarding filters, R’s unique() function is quite useful here, as it allows us to grab only distinct elements from a categorical variable. For the years filters, we’ll remove the highest year from the min filter and the lowest year from the max filter.
+
+The contents of mainPanel() are organized in a way that we have one container with four containers inside it – each of which contains one summary statistic.
+
+As for the server(), we’re simply creating a reactive dataset that calculates the summary statistics based on the selected continent and then using renderText() to display the values for each summary statistics card.
+
+Here’s the full code snippet:
+
+
+```{r}
+library(shiny)
+library(dplyr)
+library(purrr)
+library(gapminder)
+library(highcharter)
+```
+
+```{r}
+head(gapminder)
+```
+
+
+```{r}
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      titlePanel("R Shiny Highcharts"),
+      selectInput(
+        inputId = "inContinent",
+        label = "Continent:",
+        choices = unique(gapminder$continent),
+        selected = "Europe"
+      ),
+      selectInput(
+        inputId = "inYearMin",
+        label = "Start year:",
+        choices = unique(gapminder$year)[1:length(unique(gapminder$year)) - 1],
+        selected = min(gapminder$year)
+      ),
+      selectInput(
+        inputId = "inYearMax",
+        label = "End year:",
+        choices = unique(gapminder$year)[2:length(unique(gapminder$year))],
+        selected = max(gapminder$year)
+      ),
+      width = 3
+    ),
+    mainPanel(
+      tags$h3("Latest stats:"),
+      tags$div(
+        tags$div(
+          tags$p("#Countries"),
+          textOutput(outputId = "outNCountries")
+        ),
+        tags$div(
+          tags$p("Median life exp."),
+          textOutput(outputId = "outMedLifeExp")
+        ),
+        tags$div(
+          tags$p("Median population"),
+          textOutput(outputId = "outMedPop")
+        ),
+        tags$div(
+          tags$p("Median GDP"),
+          textOutput(outputId = "outMedGDP")
+        )
+      ),
+      width = 9
+    )
+  )
+)
+
+server <- function(input, output) {
+  data_cards <- reactive({
+    gapminder %>%
+      filter(
+        continent == input$inContinent,
+        year == max(year)
+      ) %>%
+      summarise(
+        nCountries = n_distinct(country),
+        medianLifeExp = median(lifeExp),
+        medianPopM = median(pop / 1e6),
+        medianGDP = median(gdpPercap)
+      )
+  })
+  
+  output$outNCountries <- renderText({
+    data_cards()$nCountries
+  })
+  output$outMedLifeExp <- renderText({
+    paste(round(data_cards()$medianLifeExp, 1), "years")
+  })
+  output$outMedPop <- renderText({
+    paste0(round(data_cards()$medianPopM, 2), "M")
+  })
+  output$outMedGDP <- renderText({
+    paste0("$", round(data_cards()$medianGDP, 2))
+  })
+}
+shinyApp(ui = ui, server = server)
+```
+
+The values are there and correct, but we’d benefit tremendously from a bit of styling. Let’s introduce CSS next.
+
+Basic Dashboard Styling
+You can use both CSS and SCSS to style your R Shiny dashboards. We’ll stick with the first option.
+
+Create a www/styles.css file and paste the following inside it:
+
+Long story short, this piece of code will change the overall font, reset a couple of styles, and make our dashboard nicer to look at.
+
+The only problem is – the CSS file isn’t connected with R Shiny.
+
+What you’ll need to do is to add a link tag to the head of the application and reference our styles.css file (Shiny assumes it’s located in the www folder). You’ll also want to add CSS class names to HTML attributes by piping the tagAppendAttributes(class = "class-name") function at the end of it.
+
+Only the code in ui has changed, server() is identical as before:
+```{r}
+library(shiny)
+library(dplyr)
+library(purrr)
+library(gapminder)
+library(highcharter)
+
+
+ui <- fluidPage(
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+  ),
+  sidebarLayout(
+    sidebarPanel(
+      titlePanel("R Shiny Highcharts"),
+      selectInput(
+        ...
+      ),
+      selectInput(
+        ...
+      ),
+      selectInput(
+        ...
+      ),
+      width = 3
+    ),
+    mainPanel(
+      tags$h3("Latest stats:"),
+      tags$div(
+        tags$div(
+          tags$p("# Countries:"),
+          textOutput(outputId = "outNCountries")
+        ) %>% tagAppendAttributes(class = "stat-card"),
+        tags$div(
+          tags$p("Median life exp:"),
+          textOutput(outputId = "outMedLifeExp")
+        ) %>% tagAppendAttributes(class = "stat-card"),
+        tags$div(
+          tags$p("Median population:"),
+          textOutput(outputId = "outMedPop")
+        ) %>% tagAppendAttributes(class = "stat-card"),
+        tags$div(
+          tags$p("Median GDP:"),
+          textOutput(outputId = "outMedGDP")
+        ) %>% tagAppendAttributes(class = "stat-card")
+      ) %>% tagAppendAttributes(class = "stat-card-container"),
+      width = 9
+    ) %>% tagAppendAttributes(class = "main-container")
+  )
+)
+
+server <- function(input, output) {
+  ...
+}
+
+
+shinyApp(ui = ui, server = server)
+
+```
+
+
+
