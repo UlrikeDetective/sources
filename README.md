@@ -2,7 +2,7 @@
 
 ![head_picture](https://github.com/UlrikeDetective/sources/blob/main/icons/head.png)
 
-The repo contains many examples and example charts for data visualizations. 
+The repo contains example charts for data visualizations including plots. 
 Helping your data insights with visualization on the next level.
 
 ### Table of Contents
