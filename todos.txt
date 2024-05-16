@@ -5,3 +5,4 @@
 * Stadia
 
 * tutorials highcharts
+* Dashboards with shiny
