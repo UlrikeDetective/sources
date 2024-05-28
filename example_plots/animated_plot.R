@@ -1,3 +1,5 @@
+# animated and interactive plot
+
 install.packages("gganimate")
 
 library(ggplot2)
