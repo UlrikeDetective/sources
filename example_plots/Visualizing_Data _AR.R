@@ -6,7 +6,6 @@ install.packages("rgl")
 library(ari)
 library(rgl)
 
-library(ari)
 ls("package:ari")
 
 # Create a 3D plot
