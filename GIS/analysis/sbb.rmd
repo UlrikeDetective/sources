@@ -1,0 +1,28 @@
+```{r}
+library(ggmap)
+
+
+
+# Data frame with GPS coordinates
+df <- data.frame(
+  lon = c(12.37263942, 12.40595096, 12.40595096, 12.42548291, 12.37237557, 12.32352196, 12.29186969, 12.31374474, 12.34277458, 12.35892207),
+  lat = c(51.33714611, 51.35936122, 51.34233123, 51.31646726, 51.31997635, 51.31785736, 51.31568457, 51.34784903, 51.36751027, 51.36252086)
+)
+
+# Add a column with labels for the points
+df$label <- 0:(nrow(df)-1)
+
+# Function to plot with different map types
+plot_map <- function(maptype) {
+  qmplot(lon, lat, data = df, maptype = maptype, zoom = 13, color = I("#222B57"), size = I(10)) +
+    geom_text(aes(label = label), hjust = 0.6, vjust = 0.4, color = "white") 
+}
+
+# Plot with different map types
+plot_map("stamen_toner")
+plot_map("stamen_toner_lite")
+plot_map("stamen_toner_background")
+plot_map("stamen_terrain")
+plot_map("stamen_terrain_lines")
+
+```
