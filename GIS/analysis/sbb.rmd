@@ -1,7 +1,7 @@
 ```{r}
 library(ggmap)
 
-
+register_stadiamaps("your-code-here", write = TRUE)
 
 # Data frame with GPS coordinates
 df <- data.frame(
