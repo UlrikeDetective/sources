@@ -40,7 +40,7 @@ Before you draw any plots, you need to register your API key.
 
 ```{r}
 
-register_stadiamaps("e004c062-5b48-47b6-a9e7-0232bd555ef9", write = TRUE)
+register_stadiamaps("your-code-here", write = TRUE)
 ```
 
 Getting a basemap for your plots¶
