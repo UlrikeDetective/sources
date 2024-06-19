@@ -1,4 +1,5 @@
 ```{r}
+# maps with points using lat and long
 library(ggmap)
 
 register_stadiamaps("your-code-here", write = TRUE)
