@@ -1,3 +1,5 @@
+# Not working yet
+
 """ Now, let’s have a look at how to create a practical Circos chart using this library.
 I will simulate a real-world problem.
 
@@ -31,17 +33,18 @@ sectors = {"North": 24, "East": 24, "South": 24, "West": 24}
 circos = Circos(sectors)
 
 # Iterate over each sector to add tracks and simulate data
-for sector in circos.sectors:
+for sector_name, sector in circos.sectors.items():
     # Simulate x (24 hours) and y (number of vehicles)
     x = np.linspace(0, 24, 24)
     y = np.random.randint(10, 1000, 24)  # Simulated hourly vehicle numbers
     
     # Add a track to the current sector
-    track = sector.add_track(1)  # Add a single track
+    track = sector.add_track((0.7, 0.9))  # Adjusted radii for better visualization
     
     # Plot bars for the number of vehicles
     track.axis.bar(x, y)
 
 # Render and save the Circos plot
-circos.figure.savefig("circos_diagram.png")
+fig = circos.plotfig()
+fig.savefig("circos_diagram.png")
 plt.show()
