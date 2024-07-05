@@ -34,8 +34,8 @@ for sector in circos.sectors:
     y = np.random.randint(10, 1000, 24)  # Simulated hourly vehicle numbers
     
     # Add a bar track to the current sector
-    bar_track = circos.sectors[sector].add_track((10, 50))
+    bar_track = sector.add_track((10, 50))
     bar_track.bar(x, y)
 
-# Finally, we can plot the Circos diagram
+# Finally, we can draw the Circos diagram
 circos.draw()
