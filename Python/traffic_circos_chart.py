@@ -24,13 +24,11 @@ from pycirclize import Circos
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Define the sectors and initialize Circos
-circos = Circos()
-sector_labels = ["North", "East", "South", "West"]
+# Define the sectors with their sizes (24 hours each)
+sectors = {"North": 24, "East": 24, "South": 24, "West": 24}
 
-# Add sectors to Circos
-for label in sector_labels:
-    circos.add_sector(label, 24)
+# Initialize Circos with the sectors
+circos = Circos(sectors)
 
 # Iterate over each sector to add tracks and simulate data
 for sector in circos.sectors:
@@ -38,11 +36,12 @@ for sector in circos.sectors:
     x = np.linspace(0, 24, 24)
     y = np.random.randint(10, 1000, 24)  # Simulated hourly vehicle numbers
     
-    # Add a bar track to the current sector
-    track = sector.add_track(radii=(0.7, 0.9))  # Adjusted radii for better visualization
-    track.bar(x, y)
+    # Add a track to the current sector
+    track = sector.add_track(1)  # Add a single track
+    
+    # Plot bars for the number of vehicles
+    track.axis.bar(x, y)
 
 # Render and save the Circos plot
-fig = circos.plotfig()
-fig.savefig("circos_diagram.png")
+circos.figure.savefig("circos_diagram.png")
 plt.show()
