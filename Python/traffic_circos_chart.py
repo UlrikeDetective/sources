@@ -37,5 +37,5 @@ for sector in circos.sectors:
     bar_track = sector.add_track((10, 50))
     bar_track.bar(x, y)
 
-# Finally, we can draw the Circos diagram
-circos.draw()
+# Save the Circos diagram to a file
+circos.save("circos_diagram.png")
