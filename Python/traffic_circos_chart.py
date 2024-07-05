@@ -22,9 +22,10 @@ the 50th. In this ring-shaped area, the bar chart will be rendered."""
 
 from pycirclize import Circos
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Define the sectors for the four directions
-sectors = {"North": 24, "East": 24, "South": 24, "West": 24}
+sectors = ["North", "East", "South", "West"]
 circos = Circos(sectors, space=5)
 
 # Iterate over each sector to add tracks and simulate data
@@ -34,8 +35,10 @@ for sector in circos.sectors:
     y = np.random.randint(10, 1000, 24)  # Simulated hourly vehicle numbers
     
     # Add a bar track to the current sector
-    bar_track = sector.add_track((10, 50))
-    bar_track.bar(x, y)
+    track = sector.add_track(radii=(10, 50))
+    track.bar(x, y)
 
-# Save the Circos diagram to a file
-circos.save("circos_diagram.png")
+# Render and save the Circos plot
+fig = circos.plotfig()
+fig.savefig("circos_diagram.png")
+plt.show()
