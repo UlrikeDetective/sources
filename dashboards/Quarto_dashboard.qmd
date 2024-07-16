@@ -1,0 +1,135 @@
+---
+title: "Palmer Penguins"
+author: "Ulrike"
+format: 
+  dashboard:
+    css: 
+      - ../styles/styles.css
+    embed-resources: true
+logo: ../logos/penguins.png
+theme: 
+  - zephyr
+  - ../styles/styles.scss
+---
+
+## Quarto dashboards
+With Quarto v1.4 you can create interactive dashboards using Python, R, Julia and Observable. You need an IDE like RStudio or VS Code to create .qmd file which is the file extension of Quarto documents. To create a dashboard you need to specify a format called dashboard in your YAML header section. Here is an example (I will be using the palmerpenguins package as an example):
+
+## Layout
+The layout of Quarto dashboards is flexible and easy to specify based on a row and column-based layout. Using # you can define the tab of your dashboard. Using ## Row with a certain height allows you to determine the upper part of your dashboard. Within that part, you can use ### to split that part again. This will look like this:
+
+```{r}
+# Analysis
+
+## Row {height=40%}
+
+### Column {width=80%}
+```
+
+This is well documented on the dashboard layout page of Quarto.
+
+Example dashboard
+In the code below I would like to show what you can achieve with this awesome tool:
+
+```{r}
+install.packages("gt")
+install.packages("palmerpenguins")
+```
+
+
+```{r}
+# import packages
+library(tidyverse)
+library(crosstalk)
+library(DT)
+library(plotly)
+library(gt)
+library(palmerpenguins)
+```
+```{r}
+# import data
+penguins <- palmerpenguins::penguins
+```
+
+```{r}
+# Crosstalk dataset
+shared_penguins <- SharedData$new(penguins)
+```
+
+```{r}
+# Set theme
+theme_set(theme_minimal())
+```
+
+```{r}
+penguins
+```
+
+
+```{r}
+filter_checkbox("sex", "Sex", shared_penguins, ~sex)
+```
+
+```{r}
+# Analysis
+
+## Row {height=40%}
+
+### Column {width=80%}
+
+#| title: "Slider options"
+slider_width = 800
+htmltools::div(
+    id = "sliderdiv", 
+    filter_slider("bill_length_mm", "bill length", shared_penguins, ~bill_length_mm, width = slider_width),
+    filter_slider("bill_depth_mm", "bill depth", shared_penguins, ~bill_depth_mm, width = slider_width),
+    filter_slider("flipper_length_mm", "flipper length", shared_penguins, ~flipper_length_mm, width = slider_width),
+    filter_slider("body_mass_g", "body mass", shared_penguins, ~body_mass_g, width = slider_width)
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Number of penguins"
+list(
+  icon = "tencent-qq",
+  color = "primary",
+  value = nrow(penguins)
+)
+```
+```{r}
+colnames(penguins)
+```
+
+
+```{r}
+#| title: "Flipper length vs body mass"
+p <- ggplot(shared_penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species, shape = species)) +
+  geom_point() +
+  scale_color_manual(values = c("darkorange","darkorchid","cyan4")) 
+
+ggplotly(p)
+```
+
+```{r}
+#| title: "bill length by species"
+p <- ggplot(data = penguins, aes(x = species, y = bill_length_mm)) +
+  geom_boxplot(alpha = 0.2) +
+  geom_jitter(aes(color = species),
+              width = 0.1, 
+              alpha = 0.7,
+              show.legend = FALSE) +
+  scale_color_manual(values = c("darkorange","darkorchid","cyan4"))
+ggplotly(p)
+```
+# Table
+
+Table of the palmerpenguins dataset. You can use the sliders and checkboxes to filter the table.
+```{r}
+DT::datatable(shared_penguins)
+```
+# Citation
+```{r}
+citation("palmerpenguins")
+```
+

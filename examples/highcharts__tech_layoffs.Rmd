@@ -1,0 +1,224 @@
+---
+title: "R_Highcharts_Drilldown"
+author: "Ulrike Herold"
+date: "2024-05-14"
+output: html_document
+---
+
+# R Highcharts Drilldown - How to Create Animated and Interactive Drilldown Charts in R
+
+
+```{r library, include=FALSE}
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(highcharter)
+```
+
+## Data
+
+```{r data}
+tech_layoffs <- read.csv("/Users/ulrike_imac_air/projects/DataScienceProjects/tech_layoffs_project/tech_layoffs_csv/tech_layoffs_Q22024_csv/layoffs_Continent_sum_year.csv")
+sales
+```
+
+```{r}
+# Reshape data to long format
+tech_layoffs_long <- tech_layoffs %>%
+  pivot_longer(cols = starts_with("X"), names_to = "Year", values_to = "Laid_off") %>%
+  mutate(Year = as.integer(sub("X", "", Year)))
+
+tech_layoffs_long
+```
+
+
+```{r}
+# Group and nest data
+drilldown_chart_data <- tech_layoffs_long %>%
+  group_by(Continent) %>%
+  nest() %>%
+  mutate(
+    id = Continent,
+    type = "column",
+    data = map(data, ~mutate(.x, name = Total_Laid_off, y = Laid_off)),
+    data = map(data, list_parse)
+  )
+```
+
+
+
+```{r}
+# Create highchart with drilldown
+
+highchart() %>%
+  hc_chart(type = "column") %>%
+  hc_title(text = "Tech Layoffs by Continent") %>%
+  hc_add_series(
+    name = "Total Layoffs",
+    data = list_parse(base_chart_data),
+    colorByPoint = TRUE
+  ) %>%
+  hc_drilldown(
+    allowPointDrilldown = TRUE,
+    series = list_parse(drilldown_chart_data)
+  )
+
+```
+
+And that's your first R Highcharts drilldown chart! It's a bit rough around the edges, but it gets the basics done pretty well. Let's style it a bit next.
+
+## Styling R Highcharts Drilldown Plots
+This section will show you how to tweak the looks of tooltips and how to add common chart elements to your visualizations to make them production-ready.
+
+### Changing Colors and Adding Chart Elements
+We have three columns on the first chart, which means you can pass in a vector of three hex colors to hc_colors(). That will change the individual bar coloring immediately.
+
+As for the title, subtitle, axis labels, and the overall theme - everything remains the same as explained in our introductory article.
+```{r}
+hchart(
+  base_chart_data,
+  "column",
+  hcaes(x = country, y = sales, drilldown = country),
+  name = "Sales",
+  colorByPoint = TRUE
+) |>
+  hc_drilldown(
+    allowPointDrilldown = TRUE,
+    series = list_parse(drilldown_chart_data)
+  ) |>
+  hc_colors(c("#004c5f", "#0099bf", "#00ccff")) |>
+  hc_title(text = "Company sales report") |>
+  hc_subtitle(text = "Source: Internal") |>
+  hc_xAxis(title = list(text = "Location")) |>
+  hc_yAxis(title = list(text = "Sales in $000")) |>
+  hc_add_theme(hc_theme_smpl())
+```
+You can view more themes by visiting the official documentation.
+
+There really isn't much to tweaking the basic aesthetics of your Highcharts visualizations. Everything you already know from the previous article still holds, as demonstrated in the above example.
+
+Tooltip Customization
+There are two ways to customize a tooltip in R Highcharts. The first leverages tooltip_table() which expects two vectors of corresponding X and Y values.
+
+With this approach, you need to construct the tooltip_table first and then pass it as pointFormat to hc_tooltip() function.
+
+The rest of the code remains unchanged:
+```{r}
+x <- c("Sales (000):")
+y <- c("${point.sales}")
+
+tt <- tooltip_table(x, y)
+
+hchart(
+  base_chart_data,
+  "column",
+  hcaes(x = country, y = sales, drilldown = country),
+  name = "Sales",
+  colorByPoint = TRUE
+) |>
+  hc_drilldown(
+    allowPointDrilldown = TRUE,
+    series = list_parse(drilldown_chart_data)
+  ) |>
+  hc_tooltip(
+    pointFormat = tt,
+    useHTML = TRUE,
+    valueDecimals = 0
+  ) |>
+  hc_colors(c("#004c5f", "#0099bf", "#00ccff")) |>
+  hc_title(text = "Company sales report") |>
+  hc_subtitle(text = "Source: Internal") |>
+  hc_xAxis(title = list(text = "Location")) |>
+  hc_yAxis(title = list(text = "Sales in $000")) |>
+  hc_add_theme(hc_theme_smpl())
+```
+
+The second approach is more manual but allows you to take the ultimate control over the contents of the tooltip, how they're arranged, and what they look like.
+
+It still uses the same hc_tooltip() function, but this time, you need to pass in a JavaScript function that returns an HTML-formatted string, as shown below:
+```{r}
+hchart(
+  base_chart_data,
+  "column",
+  hcaes(x = country, y = sales, drilldown = country),
+  name = "Sales",
+  colorByPoint = TRUE
+) |>
+  hc_drilldown(
+    allowPointDrilldown = TRUE,
+    series = list_parse(drilldown_chart_data)
+  ) |>
+  hc_tooltip(
+    formatter = JS("function(){return '<i>Sales in 000:</i><br>' + '$ ' + this.point.sales;}")
+  ) |>
+  hc_colors(c("#004c5f", "#0099bf", "#00ccff")) |>
+  hc_title(text = "Company sales report") |>
+  hc_subtitle(text = "Source: Internal") |>
+  hc_xAxis(title = list(text = "Location")) |>
+  hc_yAxis(title = list(text = "Sales in $000")) |>
+  hc_add_theme(hc_theme_google())
+```
+
+The string can get quite messy if you want to display multiple fields, but it's highly flexible.
+
+Whichever you opt for, you won't go wrong.
+
+Exploring Other Chart Types for Drilldowns
+It's important to address that column charts aren't the only type of chart suitable for drill-downs. The concept is chart-type-agnostic, but column charts made the most sense in our use case.
+
+The other type that could make sense is a pie chart, so let's see how to go about it.
+
+From the previous code snippet, you only need to change "column" into "pie" - it's that easy. We've also removed some other parts of the code responsible for styling, as they don't make much sense for pie charts:
+```{r}
+hchart(
+  base_chart_data,
+  "pie",
+  hcaes(x = country, y = sales, drilldown = country),
+  name = "Sales",
+  colorByPoint = TRUE
+) |>
+  hc_drilldown(
+    allowPointDrilldown = TRUE,
+    series = list_parse(drilldown_chart_data)
+  ) |>
+  hc_title(text = "Company sales report") |>
+  hc_subtitle(text = "Source: Internal")
+```
+The only problem is, that you get a pie chart as a default one, and a column chart is still used in the drilled-down version. Maybe that's what you want, but it probably isn't.
+
+The reason why this happens boils down to the logic behind drilldown_chart_data. We explicitly said we wanted a column chart, and Highcharts has no trouble working with different chart types in a drilldown.
+
+To fix this, we'll have to redeclare drilldown_chart_data and specify type = "pie". Everything else remains unchanged:
+```{r}
+drilldown_chart_data <- sales %>%
+  group_nest(country) %>%
+  mutate(
+    id = country,
+    type = "pie",
+    data = map(data, mutate, name = city, y = sales),
+    data = map(data, list_parse)
+  )
+
+hchart(
+  base_chart_data,
+  "pie",
+  hcaes(x = country, y = sales, drilldown = country),
+  name = "Sales",
+  colorByPoint = TRUE
+) |>
+  hc_drilldown(
+    allowPointDrilldown = TRUE,
+    series = list_parse(drilldown_chart_data)
+  ) |>
+  hc_title(text = "Company sales report") |>
+  hc_subtitle(text = "Source: Internal")
+```
+
+You now have a pie chart both in the default view and in the drilled-down view. Neat!
+
+It's worth noting that you can easily turn this visualization into a line chart (the same changes are required), but it doesn't make much sense visually. Some chart types will require different parameter names in hcaes(), so make sure to keep that in mind.
+
+Summing Up R Highcharts Drilldown
+To conclude, look no further than adding drill-downs to existing charts if you want to take your applications and websites to the next level. They won't change the user interface at all, but will significantly improve the user experience because users want to click on interactive elements.
+
+Speaking of applications, Highcharts is fully compatible with R Shiny, which will be a topic for an upcoming article on the Appsilon blog. Make sure to stay tuned because we'll build a modern dashboard will plain interactive charts and drilldowns from scratch!
