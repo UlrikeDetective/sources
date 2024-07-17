@@ -1,5 +1,6 @@
 import osmnx as ox
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
 import networkx as nx
 
 # List of places (cities) you want to visualize
@@ -41,6 +42,9 @@ additional_colors = [
 # Combine the colors to make 12 pairs
 color_palette_actual.extend(additional_colors[:9])
 
+# Set the font properties
+font_properties = FontProperties(fname='/usr/share/fonts/truetype/nanum/NanumGothic.ttf', size=15)  # Adjust path and size as necessary
+
 for i, place_name in enumerate(places):
     # Download the street network data
     graph = ox.graph_from_place(place_name, network_type='drive')
@@ -49,7 +53,10 @@ for i, place_name in enumerate(places):
     background_color, edge_color = color_palette_actual[i % len(color_palette_actual)]
 
     # Plot the street network
-    fig, ax = ox.plot_graph(graph, node_size=0, edge_color=edge_color, edge_linewidth=1.5, bgcolor=background_color)
+    fig, ax = ox.plot_graph(graph, node_size=0, edge_color=edge_color, edge_linewidth=1.5, bgcolor=background_color, show=False, close=False)
+
+    # Add the city and country name at the top of the visualization
+    ax.text(0.5, 1.05, place_name, transform=ax.transAxes, fontsize=20, fontproperties=font_properties, ha='center', va='center')
 
     # Save the plot to a file
     filename = f'urban_network_{place_name.replace(", ", "_").replace(" ", "_")}.png'
