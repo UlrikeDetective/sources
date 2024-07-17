@@ -6,7 +6,7 @@ import networkx as nx
 place_name = "Manhattan, New York, USA"
 
 # Download the street network data
-graph = ox.graph_from_place(place_name, network_type='drive')
+graph = ox.graph_from_place(place_name, network_type='drive') # walk
 
 # Define color palette pairs
 color_palette_actual = [
