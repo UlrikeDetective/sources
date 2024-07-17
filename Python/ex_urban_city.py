@@ -21,22 +21,22 @@ places = [
 
 # Define color palette pairs
 color_palette_actual = [
-    ('#D2042D', '#FFF5EE'),  # CherryRed and OffWhite
-    ('#FF7F50', '#FFFF00'),  # Coral and Yellow
-    ('#FFC1CC', '#D2042D')   # BubblegumPink and CherryRed
+    ('#E81092', '#E0CABA'),  # CherryRed and OffWhite
+    ('#FF7F50', '#E3FC7C'),  # Coral and Yellow
+    ('#F7A8B6', '#FC3A61')   # BubblegumPink and CherryRed
 ]
 
 # Extend with additional colors if necessary
 additional_colors = [
-    ('#0000FF', '#ADD8E6'),  # Blue and LightBlue
-    ('#008000', '#00FF00'),  # Green and Lime
-    ('#FFA500', '#FFD700'),  # Orange and Gold
-    ('#800080', '#EE82EE'),  # Purple and Violet
-    ('#A52A2A', '#FFDEAD'),  # Brown and NavajoWhite
-    ('#000000', '#808080'),  # Black and Gray
-    ('#FF1493', '#FFB6C1'),  # DeepPink and LightPink
-    ('#4B0082', '#8A2BE2'),  # Indigo and BlueViolet
-    ('#5F9EA0', '#E0FFFF')   # CadetBlue and LightCyan
+    ('#0E5CEB', '#79CDE8'),  # Blue and LightBlue
+    ('#97FF12', '#0EEBAE'),  # Green and Lime
+    ('#F7B377', '#FF6400'),  # Orange and Gold
+    ('#6B026B', '#EE82EE'),  # Purple and Violet
+    ('#613232', '#F7D5A1'),  # Brown and NavajoWhite
+    ('#877A7A', '#BAB15B'),  # Black and Gray
+    ('#F70086', '#FFB6C1'),  # DeepPink and LightPink
+    ('#4B0082', '#B361FF'),  # Indigo and BlueViolet
+    ('#0FB5BA', '#B3F5F5')   # CadetBlue and LightCyan
 ]
 
 # Combine the colors to make 12 pairs
@@ -76,4 +76,5 @@ for i, place_name in enumerate(places):
     # Save the plot to a file
     filename = f'urban_network_{place_name.replace(", ", "_").replace(" ", "_")}.png'
     plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.show()
     plt.show()
