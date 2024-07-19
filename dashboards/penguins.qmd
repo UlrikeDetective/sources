@@ -1,6 +1,6 @@
 ---
 title: "Palmer Penguins"
-author: "Quinten Sandberg"
+author: "me"
 format: 
   dashboard:
     css: 
