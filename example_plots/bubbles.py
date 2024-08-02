@@ -28,3 +28,18 @@ plt.show()
 
 bubble_chart = BubbleChart(area=browser_market_share['market_share'],
                            bubble_spacing=2)
+
+# horizontel line
+
+ def __init__(self, area, bubble_spacing=0):
+        area = np.asarray(area)
+        r = np.sqrt(area / np.pi)
+
+        self.bubble_spacing = bubble_spacing
+        self.bubbles = np.ones((len(area), 4))
+        self.bubbles[:, 2] = r
+        self.bubbles[:, 3] = area
+
+        # UPDATE: Position the bubbles in a horizontal row, touching each other
+        self.bubbles[:, 0] = np.cumsum(r * 2 + self.bubble_spacing) - r - self.bubble_spacing / 2
+        self.bubbles[:, 1] = 0  
