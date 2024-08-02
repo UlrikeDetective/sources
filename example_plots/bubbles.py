@@ -23,3 +23,8 @@ ax.autoscale_view()
 ax.set_title('Browser market share')
 
 plt.show()
+
+# customization 1
+
+bubble_chart = BubbleChart(area=browser_market_share['market_share'],
+                           bubble_spacing=2)
