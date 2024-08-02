@@ -72,3 +72,13 @@ fig, ax = plt.subplots()
 bar_container = ax.bar(fruit_names, fruit_counts)
 ax.set(ylabel='pints sold', title='Gelato sales by flavor', ylim=(0, 8000))
 ax.bar_label(bar_container, fmt='{:,.0f}')
+
+#Bar labels using a callable
+
+animal_names = ['Lion', 'Gazelle', 'Cheetah']
+mph_speed = [50, 60, 75]
+
+fig, ax = plt.subplots()
+bar_container = ax.bar(animal_names, mph_speed, color="green")
+ax.set(ylabel='speed in MPH', title='Running speeds', ylim=(0, 80))
+ax.bar_label(bar_container, fmt=lambda x: f'{x * 1.61:.1f} km/h')
