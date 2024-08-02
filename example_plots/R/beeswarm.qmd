@@ -1,0 +1,266 @@
+---
+title: "Beeswarm in R"
+format: html
+editor: visual
+---
+
+# **Beeswarm in R**
+
+Bee swarm plots are similar to [strip charts](https://r-coder.com/stripchart-r/) and are designed to show the underlying distribution of the data but unlike strip charts, the data is arranged in a way that avoids overlapping.
+
+## The R `beeswarm` package contains a function of the same name that allows creating this type of plot. You need to input a numeric vector, a data frame or a list of numeric vectors.
+
+```{r}
+install.packages("beeswarm")
+```
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(300)
+
+# Bee swarm plot
+beeswarm(x) 
+
+```
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(300)
+
+# Bee swarm plot
+beeswarm(x,
+         col = 2,   # Color
+         pch = 18,  # Symbol
+         cex = 1.5) # Size 
+```
+
+The plot can also be created in horizontal mode, setting `vertical = FALSE` or `horizontal = TRUE`.
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(300)
+
+# Horizontal bee swarm plot
+beeswarm(x, col = 4,
+         vertical = FALSE) #  Or horizontal = TRUE 
+
+```
+
+## **Beeswarm by group**
+
+If you have a categorical variable representing groups it is possible to create a bee swarm plot by group based on the levels of that variable. For that purpose pass a formula to the function with the corresponding variables.
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(300)
+g <- sample(c("G1", "G2", "G3"),
+            size = 300, replace = TRUE)
+
+# Bee swarm plot by group
+beeswarm(x ~ g,
+         pch = 19, 
+         col = c("#3FA0FF", "#FFE099", "#F76D5E")) 
+
+```
+
+If you have another categorical variable which represents some subgroups inside the main groups you can color each bee swarm with different colors representing that subcategories. Use the `pwcol` argument to indicate the colors. Alternatively, you can set the pch symbols with `pwpch`.
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(300)
+g <- sample(c("G1", "G2", "G3"),
+            size = 300, replace = TRUE)
+z <- as.numeric(factor(sample(c("Yes", "No"),
+                size = 300, replace = TRUE)))
+
+# Bee swarm plot by group
+beeswarm(x ~ g,
+         pch = 19, 
+         pwcol = as.numeric(z))
+
+# Legend
+legend("topright", legend = c("Yes", "No"),
+       col = 1:2, pch = 19) 
+```
+
+## **Bee swarm plot methods**
+
+There are several methods available for arranging the data points. Each method uses a different algorithm ensuring that the data points are not overlapped.
+
+**"swarm" method (default)**
+
+This method places the points in increasing order.
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(300)
+
+# swarm method
+beeswarm(x, col = 4, pch = 19,
+         method = "swarm") 
+
+```
+
+**"center" method**
+
+The center method creates a symmetric swarm using a square grid.
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(300)
+
+# center method
+beeswarm(x, col = 4, pch = 19,
+         method = "center") 
+
+```
+
+**"hex" method**
+
+This method uses a hexagonal grid to place the data points.
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(300)
+
+# hex method
+beeswarm(x, col = 4, pch = 19,
+         method = "hex") 
+
+```
+
+## **Bee swarm priority**
+
+When `method = "swarm"` you can modify the order used to perform the priority layout. The default method is `"ascending"` and the other possible values are displayed below. Recall to type `?beeswarm` for more information about these methods. Priority: random, density, none, descending
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(300)
+g <- sample(c("G1", "G2", "G3"),
+            size = 300, replace = TRUE)
+
+# Bee swarm with random priority
+beeswarm(x ~ g, pch = 19, 
+         col = c("#3FA0FF", "#FFE099", "#F76D5E"),
+         priority = "random") 
+
+```
+
+## **Bee swarm corral methods**
+
+If some observations are placed outside the plot area you can use a "corral" method, which will adjust that data points accordingly to the selected method.
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(1000)
+g <- sample(c("G1", "G2", "G3"),
+            size = 1000, replace = TRUE)
+
+# Bee swarm plot by group
+beeswarm(x ~ g, pch = 19, 
+         col = c(rgb(0.25, 0.63, 1, 0.75),
+                 rgb(1, 0.88, 0.6, 0.75),
+                 rgb(0.97, 0.43, 0.37, 0.75)),
+         corral = "none") 
+
+```
+
+## **Bee swarm side**
+
+It is possible to display only one side of the bee swarm plot. Set `side = -1` to add the points on the left (or downwards).
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# Data generation
+set.seed(1995)
+x <- rnorm(300)
+g <- sample(c("G1", "G2", "G3"),
+            size = 300, replace = TRUE)
+
+# Left side
+beeswarm(x ~ g, pch = 19, 
+         col = c("#3FA0FF", "#FFE099", "#F76D5E"),
+         side = -1) 
+
+```
+
+### SBBudget
+
+```{r}
+library(readxl)
+SBBudget_2023 <- read_excel("/Users/ulrike_imac_air/Library/Mobile Documents/com~apple~CloudDocs/Stadt Leipzig/SBBudget/Bewilligungen SBB 2023.xlsx")
+```
+
+```{r}
+# install.packages("beeswarm")
+library(beeswarm)
+
+# swarm method
+beeswarm(SBBudget_2023$betrag, col = "darkslategray3", pch = 19,
+         method = "swarm") 
+```
+
+```{r}
+library(beeswarm)
+
+
+# Bee swarm plot by group
+beeswarm(SBBudget_2023$betrag ~ SBBudget_2023$stadtbezirksbeirat,
+         pch = 19, 
+         col = my_palette_dynamic,
+         method = "hex") 
+```
+
+```{r}
+library(beeswarm)
+
+
+# Bee swarm plot by group
+beeswarm(SBBudget_2023$betrag ~ SBBudget_2023$stadtbezirksbeirat,
+         pch = 19, 
+         col = my_palette_dynamic,
+         method = "swarm",
+         vertical = FALSE) 
+```

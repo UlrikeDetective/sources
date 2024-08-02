@@ -1,0 +1,464 @@
+---
+title: "plotting_maps_USA"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Prerequisites You are going to need to install a few extra packages to follow along with this lecture.
+
+```{r}
+# these are packages you will need, but probably already have.
+# Don't bother installing if you already have them
+#install.packages(c("ggplot2", "devtools", "dplyr", "stringr"))
+
+# some standard map packages.
+#install.packages(c("maps", "mapdata"))
+
+# the github version of ggmap, which recently pulled in a small fix I had
+# for a bug 
+
+# devtools::install_github("dkahle/ggmap")
+```
+
+### Load up a few of the libraries we will use
+
+```{r}
+library(ggplot2)
+library(ggmap)
+library(maps)
+library(mapdata)
+```
+
+## Plotting maps-package maps with ggplot
+
+### The main players:
+
+-   The `maps` package contains a lot of outlines of continents, countries, states, and counties that have been with R for a long time.
+
+-   The `mapdata` package contains a few more, higher-resolution outlines.
+
+-   The `maps` package comes with a plotting function, but, we will opt to use `ggplot2` to plot the maps in the `maps` package.
+
+-   Recall that `ggplot2` operates on data frames. Therefore we need some way to translate the `maps` data into a data frame format the `ggplot` can use.
+
+### Maps in the maps package
+
+-   Package `maps` provides lots of different map outlines and points for cities, etc.
+
+-   Some examples: `usa`, `nz`, `state`, `world`, etc.
+
+### Makin' data frames from map outlines
+
+-   `ggplot2` provides the `map_data()` function.
+
+    -   Think of it as a function that turns a series of points along an outline into a data frame of those points.
+
+    -   Syntax: `map_data("name")` where "name" is a quoted string of the name of a map in the `maps` or `mapdata` package
+
+-   Here we get a USA map from `maps`:
+
+    ```{r}
+    usa <- map_data("usa")
+
+    dim(usa)
+    head(usa)
+    tail(usa)
+    ```
+
+Here is the high-res world map centered on the Pacific Ocean from `mapdata`
+
+```{r}
+w2hr <- map_data("world2Hires")
+
+dim(w2hr)
+head(w2hr)
+tail(w2hr)
+```
+
+### The structure of those data frames
+
+These are pretty straightforward:
+
+-   `long` is longitude. Things to the west of the prime meridian are negative.
+
+-   `lat` is latitude.
+
+-   `order`. This just shows in which order `ggplot` should "connect the dots"
+
+-   `region` and `subregion` tell what region or subregion a set of points surrounds.
+
+-   `group`. This is *very important*! `ggplot2`'s functions can take a group argument which controls (amongst other things) whether adjacent points should be connected by lines. If they are in the same group, then they get connected, but if they are in different groups then they don't.
+
+    -   Essentially, having to points in different groups means that `ggplot` "lifts the pen" when going between them.
+
+### Plot the USA map
+
+-   Maps in this format can be plotted with the polygon geom. i.e. using `geom_polygon()`.
+
+-   `geom_polygon()` drawn lines between points and "closes them up" (i.e. draws a line from the last point back to the first point)
+
+-   You have to map the `group` aesthetic to the `group` column
+
+-   Of course, `x = long` and `y = lat` are the other aesthetics.
+
+#### Simple black map
+
+By default, `geom_polygon()` draws with no line color, but with a black fill:
+
+```{r}
+usa <- map_data("usa") # we already did this, but we can do it again
+ggplot() + geom_polygon(data = usa, aes(x=long, y = lat, group = group)) + 
+  coord_fixed(1.3)
+```
+
+#### What is this coord_fixed()?
+
+-   This is very important when drawing maps.
+
+-   It fixes the relationship between one unit in the y direction and one unit in the x direction.
+
+-   Then, even if you change the outer dimensions of the plot (i.e. by changing the window size or the size of the pdf file you are saving it to (in `ggsave` for example)), the *aspect ratio* remains unchanged.
+
+-   In the above case, I decided that if every y unit was 1.3 times longer than an x unit, then the plot came out looking good.
+
+    -   A different value might be needed closer to the poles.
+
+#### Mess with line and fill colors
+
+-   Here is no fill, with a red line. Remember, fixed value of aesthetics go *outside* the `aes` function.
+
+```{r}
+ggplot() + 
+  geom_polygon(data = usa, aes(x=long, y = lat, group = group), fill = NA, color = "red") + 
+  coord_fixed(1.3)
+```
+
+```{r}
+# Here is violet fill, with a blue line.
+
+gg1 <- ggplot() + 
+  geom_polygon(data = usa, aes(x=long, y = lat, group = group), fill = "violet", color = "blue") + 
+  coord_fixed(1.3)
+gg1
+
+```
+
+#### Adding points to the map
+
+-   Let's add black and yellow points at our lab and at the NWFSC in Seattle.
+
+    ```{r}
+    labs <- data.frame(
+      long = c(-122.064873, -122.306417),
+      lat = c(36.951968, 47.644855),
+      names = c("SWFSC-FED", "NWFSC"),
+      stringsAsFactors = FALSE
+      )  
+
+    gg1 + # USA map
+      geom_point(data = labs, aes(x = long, y = lat), color = "black", size = 7) +
+      geom_point(data = labs, aes(x = long, y = lat), color = "yellow", size = 4)
+    ```
+
+#### See how important the group aesthetic is
+
+Here we plot that map without using the group aesthetic:
+
+```{r}
+ggplot() + 
+      geom_polygon(data = usa, aes(x=long, y = lat), fill = "violet", color = "blue") + 
+      geom_point(data = labs, aes(x = long, y = lat), color = "black", size = 5) +
+      geom_point(data = labs, aes(x = long, y = lat), color = "yellow", size = 4) +
+      coord_fixed(1.3)
+```
+
+### State maps
+
+We can also get a data frame of polygons that tell us above state boundaries:
+
+```{r}
+states <- map_data("state")
+dim(states)
+head(states)
+tail(states)
+```
+
+#### Plot all the states, all colored a little differently
+
+This is just like it is above, but we can map fill to `region` and make sure the the lines of state borders are white.
+
+```{r}
+ggplot(data = states) + 
+  geom_polygon(aes(x = long, y = lat, fill = region, group = group), color = "white") + 
+  coord_fixed(1.3) +
+  guides(fill= "none")  # do this to leave off the color legend
+```
+
+#### Plot just a subset of states in the contiguous 48:
+
+-   Read about the `subset` command. It provides another way of subsetting data frames (sort of like using the `[ ]` operator with a logical vector).
+
+-   We can use it to grab just CA, OR, and WA:
+
+    ```{r}
+    west_coast <- subset(states, region %in% c("california", "oregon", "washington"))
+
+    ggplot(data = west_coast) + 
+      geom_polygon(aes(x = long, y = lat, group = group), fill = "palegreen", color = "black") + 
+      coord_fixed(1.3)
+    ```
+
+```{r}
+california <- subset(states, region %in% c("california"))
+
+ggplot(data = california) + 
+  geom_polygon(aes(x = long, y = lat, group = group), fill = "yellow", color = "black") + 
+  coord_fixed(1.3)
+```
+
+#### Zoom in on California and look at counties
+
+-   Getting the california data is easy:
+
+    ```{r}
+    ca_df <- subset(states, region == "california")
+
+    head(ca_df)
+    ```
+
+County lines
+
+```{r}
+counties <- map_data("county")
+ca_county <- subset(counties, region == "california")
+tail(ca_county)
+unique_counties <- unique(ca_county$subregion)
+print(unique_counties)
+```
+
+Plot the state first but let's ditch the axes gridlines, and gray background by using the super-wonderful `theme_nothing()`.
+
+```{r}
+ca_base <- ggplot(data = ca_df, mapping = aes(x = long, y = lat, group = group)) + 
+  coord_fixed(1.3) + 
+  geom_polygon(color = "black", fill = "yellow")
+ca_base + theme_nothing()
+```
+
+Now plot the county boundaries in grey:
+
+```{r}
+ca_base + theme_nothing() + 
+  geom_polygon(data = ca_county, fill = NA, color = "grey") +
+  geom_polygon(color = "black", fill = NA)  # get the state border back on top
+```
+
+#### Get some facts about the counties
+
+-   The above is pretty cool, but it seems like it would be a lot cooler if we could plot some information about those counties.
+
+-   Now I can go to wikipedia or <http://www.california-demographics.com/counties_by_population> and grab population and area data for each county.
+
+-   In fact, I copied their little table on Wikipedia and saved it into `data/ca-counties-wikipedia.txt`. In full disclosure I also edited the name of San Francisco from "City and County of San Francisco" to "San Francisco County" to be like the others (and not break my regex!)
+
+-   Watch this regex fun:
+
+    ```{r}
+    library(stringr)
+    library(dplyr)
+
+    library(stringr)
+
+    # Check if the file exists
+    file_path <- "/Users/ulrike_imac_air/projects/R_themes/example_plots/data/ca-counties.csv"
+    if (!file.exists(file_path)) {
+      stop("The file does not exist at the specified path.")
+    }
+
+    # Read the CSV file
+    ca_counties <- read.csv2(file_path)
+
+    california_poparea <- ca_counties %>%
+      # Selecting relevant columns and renaming 'County' column to 'subregion'
+      select(ID, County, Population, Area_sq_mi) %>%
+      mutate(
+        subregion = tolower(County), 
+        population = as.integer(gsub(",", "", Population)),  # Remove commas and convert to integer
+        area = as.integer(gsub(",", "", Area_sq_mi))  # Remove commas and convert to integer
+      ) %>%
+      select(-County, -ID, -Area_sq_mi, -Population)  # Remove unnecessary columns
+
+    # Print the first few rows of the data frame
+    head(california_poparea, 60)
+
+
+
+    ```
+
+We now have the numbers that we want, but we need to attach those to every point on polygons of the counties. This is a job for `inner_join` from the `dplyr` package
+
+And finally, add a column of `people_per_mile`:
+
+```{r}
+cacopa <- inner_join(ca_county, california_poparea, by = "subregion")
+cacopa
+cacopa$people_per_mile <- cacopa$population / cacopa$area
+
+```
+
+```{r}
+# Check unique values of 'subregion' in 'ca_county'
+unique(ca_county$subregion)
+
+# Check unique values of 'subregion' in 'california_poparea'
+unique(california_poparea$subregion)
+
+# Perform inner join
+cacopa <- inner_join(ca_county, california_poparea, by = "subregion")
+
+# Check unique values of 'subregion' in 'cacopa'
+unique(cacopa$subregion)
+
+```
+
+```{r}
+library(dplyr)
+
+# Trim whitespace in the 'subregion' column of the 'ca_county' data frame
+ca_county <- ca_county %>%
+  mutate(subregion = trimws(subregion))
+
+# Trim whitespace in the 'subregion' column of the 'california_poparea' data frame
+california_poparea <- california_poparea %>%
+  mutate(subregion = trimws(subregion))
+
+# Perform inner join
+cacopa <- inner_join(ca_county, california_poparea, by = "subregion")
+
+# Check unique values of 'subregion' in 'cacopa'
+unique(cacopa$subregion)
+
+```
+
+```{r}
+cacopa <- inner_join(ca_county, california_poparea, by = "subregion")
+cacopa
+cacopa$people_per_mile <- cacopa$population / cacopa$area
+```
+
+#### Now plot population density by county
+
+If you were needing a little more elbow room in the great Golden State, this shows you where you can find it:
+
+```{r}
+# prepare to drop the axes and ticks but leave the guides and legends
+# We can't just throw down a theme_nothing()!
+ditch_the_axes <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  )
+
+elbow_room1 <- ca_base + 
+      geom_polygon(data = cacopa, aes(fill = people_per_mile), color = "white") +
+      geom_polygon(color = "black", fill = NA) +
+      theme_bw() +
+      ditch_the_axes +
+      scale_fill_gradient(trans = "log10")
+
+elbow_room1 
+```
+
+#### Lame!
+
+-   The popuation density in San Francisco is so great that it makes it hard to discern differences between other areas.
+
+-   This is a job for a scale transformation. Let's take the log-base-10 of the population density.
+
+-   Instead of making a new column which is log10 of the `people_per_mile` we can just apply the transformation in the gradient using the `trans` argument
+
+    ```{r}
+    eb1 <- elbow_room1 + 
+      scale_fill_gradient(low = "lightblue", high = "darkblue")
+
+    eb1
+
+    ```
+
+#### Still not great
+
+I personally like more color than ggplot uses in its default gradient. In that respect I gravitate more toward Matlab's default color gradient. Can we do something similar with `ggplot`?
+
+```{r}
+eb2 <- elbow_room1 + 
+    scale_fill_gradientn(colours = rev(rainbow(7)),
+                         breaks = c(2, 4, 10, 100, 1000, 10000),
+                         trans = "log10")
+eb2
+
+```
+
+### zoom in?
+
+Note that the scale of these maps from package `maps` are not great. We can zoom in to the Bay region, and it sort of works scale-wise, but if we wanted to zoom in more, it would be tough.
+
+```{r}
+eb2 + xlim(-123, -121.0) + ylim(36, 38)
+```
+
+### True zoom.
+
+-   If you want to keep all the data the same but just zoom in, you can use the `xlim` and `ylim` arguments to `coord_cartesian()`. Though, to keep the aspect ratio correct we must use `coord_fixed()` instead of `coord_cartesian()`.
+
+-   This chops stuff off but doesn't discard it from the data set:
+
+    ```{r}
+    eb2 + coord_fixed(xlim = c(-123, -121.0),  ylim = c(36, 38.5), ratio = 1.3)
+
+    eb1 + coord_fixed(xlim = c(-123, -121.8),  ylim = c(37.3, 38.3), ratio = 1.3)
+    ```
+
+```{r}
+elbow_room2 <- ca_base + 
+      geom_polygon(data = cacopa, aes(fill = population), color = "white") +
+      geom_polygon(color = "black", fill = NA) +
+      theme_bw() +
+      ditch_the_axes +
+      scale_fill_gradient(trans = "log10")
+
+elbow_room2
+```
+
+```{r}
+eb21 <- elbow_room2 + 
+  scale_fill_gradient(low = "lightblue", high = "darkblue")
+
+eb21
+```
+
+```{r}
+eb21 + coord_fixed(xlim = c(-123, -121.8),  ylim = c(37.3, 38.3), ratio = 1.3)
+```
+
+```{r}
+elbow_room3 <- ca_base + 
+      geom_polygon(data = cacopa, aes(fill = area), color = "white") +
+      geom_polygon(color = "black", fill = NA) +
+      theme_bw() +
+      ditch_the_axes +
+      scale_fill_gradient(trans = "log10")
+
+elbow_room3
+
+eb31 <- elbow_room3 + 
+  scale_fill_gradient(low = "lightblue", high = "darkblue")
+
+eb31
+
+eb31 + coord_fixed(xlim = c(-123, -121.8),  ylim = c(37.3, 38.3), ratio = 1.3)
+```

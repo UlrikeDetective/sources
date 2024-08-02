@@ -1,0 +1,63 @@
+---
+title: "Spineplot in R"
+format: html
+editor: visual
+---
+
+# **Spineplot in R**
+
+## **Data**
+
+The following table contains the count the number of Titanic survivals based of their economic status (class). This data will be used in the examples below.
+
+```{r}
+# Data 
+dat <- apply(Titanic, c(1, 4), sum)
+
+dat
+```
+
+## **Spineplot**
+
+Spineplots are a generalization of [stacked bar charts](https://r-charts.com/part-whole/stacked-bar-graph/). The `spineplot` function allows creating this type of graph in base R (actually a mosaic plot, which is a spineplot for two or more variables). See `?spineplot` to know more about the possible input options.
+
+```{r}
+spineplot(dat)
+```
+
+**Transpose the variables**
+
+The spineplot can be flipped transposing the data, as in the example below.
+
+```{r}
+spineplot(t(dat))
+```
+
+### **Color customization**
+
+**Fill color**
+
+You can pass a vector of colors to `col` to customize the default gray scale colors. Pass as many colors as classes on the Y-axis.
+
+```{r}
+spineplot(dat, col = c("#07798D", "#7BCB9F"))
+```
+
+**Border color**
+
+You can also customize the border color with `border`. In this example we are setting it to the fill color.
+
+```{r}
+spineplot(dat, col = c("#07798D", "#7BCB9F"),
+          border = c("#07798D", "#7BCB9F"))
+```
+
+**Spinogram**
+
+Spinograms are a generalization of histograms. The default `spineplot` function creates a spineplot, but setting `off = 0` a spinogram will be created, removing the offset between the bars.
+
+```{r}
+spineplot(dat, off = 0,
+          col = c("lightgreen", "red"),
+          border = c("white", "white"))
+```
