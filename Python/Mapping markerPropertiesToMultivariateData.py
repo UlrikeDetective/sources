@@ -13,7 +13,7 @@ SUCCESS_SYMBOLS = [
 ]
 
 N = 25
-np.random.seed(42)
+np.random.seed(32)
 skills = np.random.uniform(5, 80, size=N) * 0.1 + 5
 takeoff_angles = np.random.normal(0, 90, N)
 thrusts = np.random.uniform(size=N)
