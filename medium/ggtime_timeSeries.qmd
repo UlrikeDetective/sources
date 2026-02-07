@@ -1,0 +1,238 @@
+---
+title: "ggtime_timeSeries"
+format: html
+editor: visual
+---
+
+# **How to Visualize Time Series Patterns with ggtime in R Programming**
+
+## **Installing and Loading ggtime**
+
+The ggtime package is available on CRAN so standard R package installation commands are ok to use. To help develop your ideas and familiarity to the concepts with the package, you’ll also want the tsibbledata package for access to example datasets that demonstrate various temporal patterns.
+
+```{r}
+install.packages("ggtime")
+install.packages("tsibble")
+install.packages("tsibbledata")
+install.packages("fable")
+install.packages("dplyr")
+install.packages("ggplot2")
+```
+
+Libraries
+
+```{r}
+library(ggtime)
+library(tsibble)
+library(tsibbledata)
+library(fable)
+library(dplyr)
+library(ggplot2)
+```
+
+As with all R scripts, the library() function calls load ggtime along with the essential time series infrastructure packages. The tsibble package provides the temporal data structure that ggtime expects, while tsibbledata yield real-world datasets for examples. The fable package enables forecasting capabilities that integrate with ggtime's diagnostic plots, and dplyr provides the data manipulation verbs you'll use to prepare your time series. These packages work together as a complete ecosystem for time series analysis and visualization.
+
+## **Creating Basic Time Plots with autoplot()**
+
+The simplest entry point to ggtime is the *autoplot()* function, which creates standard time series plots from tsibble objects. Let's examine Australian beer production data to see how this works.
+
+```{r}
+# create a basic time plot of beer production
+tsibbledata::aus_production |> 
+  autoplot(Beer)
+```
+
+```{r}
+tsibbledata::aus_production
+```
+
+## **Visualizing Seasonal Patterns with gg_season()**
+
+When your data contains strong seasonal components, the *gg_season()* function reveals patterns that standard time plots obscure. This function creates seasonal plots where the x-axis shows time within each season rather than the full timeline.
+
+```{r}
+install.packages("ggtime")
+library(ggtime)
+```
+
+```{r}
+tsibbledata::aus_production
+
+```
+
+```{r}
+# create a customized time plot using grammar elements
+tsibbledata::aus_production |> 
+  ggplot(aes(x = Quarter, y = Beer)) +
+  geom_line(colour = "steelblue", linewidth = 1) +
+  labs(title = "Australia Beer Production over Time",
+       subtitle = "Quarterly data showing seasonal patterns",
+       x = "Quarter",
+       y = "Production (Megalitres)") +
+  theme_minimal()
+```
+
+```{r}
+tsibbledata::aus_retail
+
+unique(tsibbledata::aus_retail$Industry)
+```
+
+```{r}
+library(dplyr)
+
+tsibbledata::aus_retail |> 
+  distinct(Industry)
+```
+
+```{r}
+tsibbledata::aus_retail |> 
+  distinct(State)
+```
+
+```{r}
+# Create a seasonal plot of Australia retail turnover
+
+tsibbledata::aus_retail |> 
+  filter(State == "Victoria",
+         Industry == "Cafes, restaurants and catering services") |> 
+  gg_season(Turnover, periode = "1 year")
+```
+
+The *filter()* operation first restricts our analysis to Victorian cafes, restaurants, and catering services. The *gg_season()* function then creates a plot where each year appears as a separate colored line, all aligned to show the same 12-month calendar period. This visualization makes it immediately apparent which months consistently show higher or lower turnover and whether the seasonal pattern has changed over time. The period parameter tells ggtime to align data by year, though you could specify other periodicities like "1 month" for weekly patterns within months, or "1 week" for daily patterns within weeks.
+
+What makes seasonal plots particularly valuable is how they highlight exceptional years. If one year’s line deviates significantly from the cluster of other years, you can immediately identify when the seasonal pattern broke down. This might reveal the impact of economic shocks, policy changes, or operational disruptions that wouldn’t be obvious in a standard time plot. The color gradient typically moves from cooler colors for earlier years to warmer colors for recent years, helping you track pattern evolution over time.
+
+## **Comparing Seasonal Subseries with gg_subseries()**
+
+While seasonal plots overlay all years on a single panel, the *gg_subseries()* function takes a different approach by creating separate facets for each season. This layout makes it easier to compare average levels across seasons and identify within-season trends.
+
+```{r}
+# Create seasonal subseries plot
+tsibbledata::aus_retail |> 
+  filter(State == "Victoria",
+         Industry == "Cafes, restaurants and catering services") |> 
+  gg_subseries(Turnover)
+```
+
+The *gg_subseries()* function splits your time series into separate panels, one for each unique season in your data. For monthly data, this creates twelve panels showing only January data in the first panel, only February data in the second, and so on. Each panel displays the values as a time series over the years, with a horizontal blue line indicating the mean for that season. This layout helps you answer questions like "Is December turnover increasing over time?" or "Which month shows the most year-to-year variability?" The horizontal mean lines make it easy to spot which seasons consistently run above or below the overall average.
+
+This visualization approach proves especially useful when you need to detect changing seasonal patterns. If the December panel shows an upward trend while the June panel remains flat, you know your seasonality is evolving. Similarly, if one month’s panel shows much wider scatter than others, that month’s values are less predictable and might require special attention in forecasting models. These insights directly inform model specification decisions when you move from exploratory visualization to formal analysis, such as the time series forecasting work I covered in my caretForecast article.
+
+## **Examining Lag Relationships with gg_lag()**
+
+Autocorrelation — the relationship between a time series and lagged versions of itself — is fundamental to time series analysis. The *gg_lag()* function creates lag plots that visualize these relationships across multiple lag periods simultaneously.
+
+```{r}
+# create log plots for retail turnover
+tsibbledata::aus_retail |> 
+  filter(State == "Victoria",
+         Industry == "Cafes, restaurants and catering services") |> 
+  gg_lag(Turnover, lags = 1:9)
+```
+
+The *gg_lag()* function produces a panel of scatterplots, each showing the time series plotted against itself at different lags. The lags parameter specifies which lags to display—in this case, lags 1 through 9. Lag 1 plots each observation against the previous observation, lag 2 plots against the observation two periods back, and so on. Strong positive correlation at specific lags (visible as points clustering along a positive diagonal) indicates that those lags are good predictors of current values. For monthly data with annual seasonality, you'd expect strong correlation at lag 12 (twelve months back) since December values tend to resemble previous Decembers more than they resemble the previous month.
+
+These lag plots serve two critical purposes in time series work. First, they help you identify which lagged values to include when building autoregressive models — a technique I discussed extensively in my zoo time series article where *dynlm()* is used for dynamic linear modeling. Second, they reveal the presence and strength of seasonal patterns. If you see strong correlation at regular intervals (every 12 months, every 4 quarters, every 7 days), you know your data contains systematic seasonal structure that models need to account for. The visual approach makes these patterns immediately apparent without requiring formal correlation statistics.
+
+## **Diagnostic Plots for Model Residuals with gg_tsresiduals()**
+
+After fitting a forecasting model, checking residuals is essential to validate model assumptions. The *gg_tsresiduals()* function creates a comprehensive diagnostic display that reveals potential model inadequacies.
+
+```{r}
+install.packages("feasts")
+library(feasts)
+```
+
+```{r}
+# Fit an ETS model and examine residuals
+tsibbledata::aus_production |> 
+  model(ETS(Beer)) |> 
+  gg_tsresiduals()
+```
+
+The time plot reveals whether residuals show any remaining patterns over time—good models should produce residuals that look like random noise. The ACF plot checks for autocorrelation in residuals; significant spikes indicate the model hasn't fully captured temporal structure. The histogram assesses whether residuals follow a normal distribution, which many forecasting methods assume.
+
+This three-panel layout gives you a complete residual diagnostic in a single view. If you see patterns in the time plot, you know the model is missing some systematic component of your data. If the ACF shows significant spikes beyond the confidence bands, your model hasn’t fully captured the autocorrelation structure. If the histogram is heavily skewed or has long tails, you might need to transform your data or consider models that relax normality assumptions. The *plot_type* parameter lets you switch the bottom panel from a histogram to a Q-Q plot if you prefer a different distributional diagnostic. These residual checks connect directly to the model evaluation techniques I covered in my Triple Exponential Smoothing article, where proper residual analysis ensures forecast reliability.
+
+## **Complete Time Series Display with gg_tsdisplay()**
+
+When exploring a new time series, you often want to see multiple perspectives simultaneously. The *gg_tsdisplay()* function provides a comprehensive overview by combining a time plot with autocorrelation and partial autocorrelation functions.
+
+```{r}
+# create comprehensive time series display
+tsibbledata::aus_retail |> 
+  filter(State == "Victoria",
+         Industry == "Cafes, restaurants and catering services") |> 
+  gg_tsdisplay(Turnover)
+```
+
+This comprehensive display proves invaluable when starting analysis on a new time series. You can immediately identify whether the series has trend (visible slope in the time plot), seasonality (regular spikes in the ACF at seasonal lags), and the general complexity of temporal patterns. The lag_max parameter controls how many lags appear in the ACF and PACF plots, letting you focus on the relevant temporal window for your data frequency. For monthly data, setting lag_max to 36 or 48 ensures you can see several full years of autocorrelation structure.
+
+## **Visualizing ARIMA Model Components with gg_arma()**
+
+When you’ve fitted an ARIMA model, the *gg_arma()* function provides diagnostic visualization of the model's characteristic roots, helping you assess model stability and seasonal components.
+
+```{r}
+# fit ARIMA model and visualize roots
+tsibbledata::aus_retail |> 
+  filter(State == "Victoria",
+         Industry == "Cafes, restaurants and catering services") |> 
+  model(ARIMA(Turnover ~ pdq(0,1,1) + PDQ(0,1,1))) |> 
+  gg_arma()
+```
+
+The *model()* function fits an ARIMA(0,1,1)(0,1,1) model to the turnover data, specifying both regular and seasonal differencing with moving average terms. The *gg_arma()* function then creates a plot showing the inverse roots of the autoregressive (AR) and moving average (MA) components on a unit circle. For a stable, invertible model, all roots should lie inside the unit circle. Roots outside the circle appear in red, signaling potential model instability. This visualization helps you diagnose whether your model specification is appropriate and whether the model's long-term forecasts will behave reasonably.
+
+Understanding characteristic roots might seem abstract, but they have practical implications for forecast reliability. Models with roots close to the unit circle will produce forecasts that respond sluggishly to recent data changes, while roots far inside the circle produce forecasts that quickly revert to mean levels. Seasonal roots indicate how the model captures recurring patterns. The visual representation makes these mathematical properties accessible without requiring detailed knowledge of time series theory. This diagnostic complements the residual analysis from *gg_tsresiduals(*), giving you multiple perspectives on model adequacy.
+
+## **Practical Applications for Business Analytics**
+
+The ggtime functions transform complex time series analysis tasks into straightforward visualization workflows. When analyzing customer acquisition patterns, *gg_season()* immediately reveals whether certain months consistently outperform others or if seasonal patterns have shifted due to market changes. Marketing teams can use *gg_subseries()* to track campaign performance within specific periods, identifying which quarters show improving trends and which have stagnated.
+
+Financial analysts benefit from *gg_lag()* when examining relationships between current sales and historical values, helping identify optimal inventory ordering cycles. The *gg_tsdisplay()* function becomes your first analytical step when exploring new data sources, providing instant insight into temporal structure before investing time in complex modeling. Operations managers can use *gg_tsresiduals(*) to validate demand forecasting models, ensuring predictions are reliable enough to drive purchasing and staffing decisions.
+
+These visualization tools particularly shine in organizational contexts where stakeholders need to understand temporal patterns without diving into technical details. A *gg_season()* plot showing how each year's monthly pattern compares tells a clear story about seasonal stability. A *gg_subseries()* display revealing that certain months have been trending upward while others remain flat provides actionable insight for resource allocation. The visual clarity these functions provide helps bridge the gap between technical analysis and business decision-making.
+
+## **Integration with Forecasting Workflows**
+
+The ggtime package integrates seamlessly with forecasting workflows built on the fable package. After fitting multiple candidate models, you can use ggtime’s diagnostic functions to compare residual patterns and select the best performer. The package also works well with the feasts package for feature extraction, letting you visualize the features used in model selection and interpretation.
+
+```{r}
+install.packages("urca")
+library(urca)
+```
+
+```{r}
+# Example forecasting workflow with ggtime
+library(fable)
+library(feasts)
+
+# Fit multiple models
+fit_models <- tsibbledata::aus_retail |> 
+  filter(State == "Victoria",
+         Industry == "Cafes, restaurants and catering services") |> 
+  model(
+    ets = ETS(Turnover),
+    arima = ARIMA(Turnover),
+    snaive = SNAIVE(Turnover)
+  )
+
+# Generate forecasts
+forecasts <- fit_models |> 
+  forecast(h = "2 years")
+
+# Visualize forecasts with autoplot
+forecasts |> 
+  autoplot(filter(aus_retail, State == "Victoria",
+                  Industry == "Cafes, restaurants and catering services"))
+
+# Check residuals for best model
+fit_models |> 
+  select(ets) |> 
+  gg_tsresiduals()
+```
+
+The workflow starts by fitting three different model types — ETS (Exponential Smoothing), ARIMA, and Seasonal Naive — using the *model()* function from fable. We generate two-year forecasts from each model using *forecast()* function, then visualize how these forecasts extend the historical data using *autoplot()*. Finally, we select the ETS model and examine its residuals with *gg_tsresiduals()* to validate model assumptions. This integrated approach lets you move seamlessly from model fitting through visualization to validation, all within a consistent tidyverse-style workflow.
+
+The connection between ggtime and the broader tidyverts ecosystem means your visualization code integrates naturally with data preparation, modeling, and evaluation steps. You can pipe tsibble data through dplyr verbs for filtering and aggregation, into fable for modeling, and into ggtime for visualization without changing data structures or breaking the analysis flow. This workflow efficiency reduces errors and makes your analysis more reproducible. The same approach works whether you’re analyzing daily website traffic, monthly financial metrics, or quarterly business KPIs.
