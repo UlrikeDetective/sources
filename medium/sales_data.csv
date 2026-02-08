@@ -18,7 +18,7 @@ date,region,city,units,revenue,cost,Marketing_Spend
 2025-02-10,San Mateo,Daly City,74,1753.57,1227.5,263.04
 2025-05-20,Contra Costa,Richmond,72,1625.45,1137.82,243.82
 2025-05-21,Santa Clara,San Jose,125,2923.17,2046.22,438.48
-2025-04-25,San Mateo,San Mateo,90,1643.45,1150.41,246.52
+2025-04-25,San Mateo,San Mateo,90,1643.45,11504.1,246.52
 2025-01-05,Sonoma,Healdsburg,152,2770.96,1939.67,415.64
 2025-02-02,Sonoma,Petaluma,131,3123.44,2186.41,468.52
 2025-01-14,Solano,Vallejo,170,4031.0,2821.7,604.65
@@ -106,7 +106,7 @@ date,region,city,units,revenue,cost,Marketing_Spend
 2025-01-08,San Mateo,Redwood City,93,1741.83,1219.28,261.27
 2025-01-28,Santa Clara,San Jose,127,2772.05,1940.43,415.81
 2025-05-26,Marin,Mill Valley,84,2008.21,1405.75,301.23
-2025-04-25,San Francisco,San Francisco,106,2160.55,1512.38,324.08
+2025-04-25,San Francisco,San Francisco,106,2160.55,15123.8,3240.8
 2025-01-21,San Francisco,San Francisco,91,2140.61,1498.43,321.09
 2025-05-29,Contra Costa,Walnut Creek,71,1355.15,948.61,203.27
 2025-01-02,Santa Clara,San Jose,65,1558.88,1091.22,233.83
@@ -120,8 +120,8 @@ date,region,city,units,revenue,cost,Marketing_Spend
 2025-06-29,San Mateo,San Mateo,54,1241.08,868.76,186.16
 2025-01-13,Alameda,Oakland,71,1297.56,908.29,194.63
 2025-05-02,Solano,Vacaville,174,3334.24,2333.97,500.14
-2025-06-26,Sonoma,Santa Rosa,191,3722.59,2605.81,558.39
-2025-04-30,San Francisco,San Francisco,152,3775.28,2642.7,566.29
+2025-06-26,Sonoma,Santa Rosa,191,3722.59,2605.81,2791.95
+2025-04-30,San Francisco,San Francisco,152,3775.28,2642.7,2831.45
 2025-04-16,San Francisco,San Francisco,188,4393.08,3075.16,658.96
 2025-01-18,San Mateo,Redwood City,91,1840.61,1288.43,276.09
 2025-02-06,Solano,Vallejo,168,3771.38,2639.97,565.71
@@ -151,7 +151,7 @@ date,region,city,units,revenue,cost,Marketing_Spend
 2025-04-07,Marin,Mill Valley,135,2692.61,1884.83,403.89
 2025-01-19,Sonoma,Healdsburg,165,4102.62,2871.83,615.39
 2025-02-27,San Mateo,San Mateo,84,1879.26,1315.48,281.89
-2025-04-13,Alameda,Fremont,79,1745.18,1221.63,261.78
+2025-04-13,Alameda,Fremont,79,1745.18,12216.3,2617.8
 2025-02-21,Solano,Fairfield,191,4546.42,3182.49,681.96
 2025-05-23,Alameda,Fremont,91,1743.93,1220.75,261.59
 2025-03-05,San Francisco,San Francisco,105,2520.72,1764.5,378.11
@@ -190,7 +190,7 @@ date,region,city,units,revenue,cost,Marketing_Spend
 2025-03-21,San Mateo,Daly City,197,4575.15,3202.6,686.27
 2025-03-19,Santa Clara,San Jose,122,2489.76,1742.83,373.46
 2025-04-13,Sonoma,Healdsburg,142,3097.55,2168.28,464.63
-2025-06-15,San Mateo,Daly City,104,2000.44,1400.31,300.07
+2025-06-15,San Mateo,Daly City,104,2000.44,70.02,300.07
 2025-03-29,San Francisco,San Francisco,193,4557.36,3190.15,683.6
 2025-05-04,Santa Clara,Palo Alto,127,2563.06,1794.14,384.46
 2025-04-02,San Mateo,Daly City,106,2416.5,1691.55,362.47
@@ -257,7 +257,7 @@ date,region,city,units,revenue,cost,Marketing_Spend
 2025-05-23,Napa,St. Helena,198,4883.14,3418.2,732.47
 2025-03-24,Santa Clara,Mountain View,154,3811.37,2667.96,571.71
 2025-02-15,Alameda,Berkeley,102,2062.62,1443.83,309.39
-2025-04-17,Marin,San Rafael,119,2495.39,1746.77,374.31
+2025-04-17,Marin,San Rafael,119,2495.39,8733.85,1871.55
 2025-06-19,Alameda,Oakland,150,3595.34,2516.74,539.3
 2025-02-20,Napa,Yountville,82,1852.95,1297.07,277.94
 2025-04-12,Santa Clara,Palo Alto,132,3048.9,2134.23,457.33
@@ -464,7 +464,7 @@ date,region,city,units,revenue,cost,Marketing_Spend
 2025-02-09,Santa Clara,San Jose,116,2430.12,1701.08,364.52
 2025-05-28,Marin,Novato,125,2681.58,1877.11,402.24
 2025-01-12,Contra Costa,Concord,129,2348.0,1643.6,352.2
-2025-05-15,Solano,Vallejo,135,2655.89,1859.12,398.38
+2025-05-15,Solano,Vallejo,135,2655.89,9295.6,1991.9
 2025-01-23,Sonoma,Petaluma,168,4187.63,2931.34,628.14
 2025-06-30,Napa,Napa,198,3789.22,2652.45,568.38
 2025-02-13,Alameda,Oakland,51,1105.86,774.1,165.88

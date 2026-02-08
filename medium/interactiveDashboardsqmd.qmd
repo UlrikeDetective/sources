@@ -84,3 +84,87 @@ p <- ggplot(df, aes(x = Marketing_Spend, y = revenue, color = region)) +
 ggplotly(p)
 
 ```
+
+## **5) Building a Shiny App Dashboard**
+
+The real magic happens when I use **Shiny** to create a dashboard.
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  titlePanel("Sales Dashboard"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("region", "Select Region:", choices = unique(df$region))
+    ),
+    mainPanel(
+      plotOutput("revenuePlot"),
+      plotOutput("profitPlot")
+    )
+  )
+)
+
+server <- function(input, output) {
+  filtered_data <- reactive({
+    df |>  filter(region == input$region)
+  })
+  
+  output$revenuePlot <- renderPlot({
+    ggplot(filtered_data(), aes(x = date, y = revenue)) +
+      geom_line(color = "steelblue") +
+      labs(title = paste("Revenue Trend -", input$region))
+  })
+  
+  output$profitPlot <- renderPlot({
+    ggplot(filtered_data(), aes(x = date, y = Profit_Margin)) +
+      geom_line(color = "darkgreen") +
+      labs(title = paste("Profit Margin Trend -", input$region))
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+## **6) Enhancing Dashboard with Flexdashboard**
+
+For business presentations, I use **flexdashboard** to create structured layouts.
+
+```{r}
+# install.packages("flexdashboard")
+install.packages("DT")
+```
+
+```{---}
+title: "Revenue & Profit Dashboard"
+output: flexdashboard::flex_dashboard
+---
+
+library(ggplot2)
+library(dplyr)
+library(DT)
+
+# Assuming 'df' is your data frame. 
+# If 'date' isn't a date object yet, uncomment the line below:
+# df$date <- as.Date(df$date)
+```
+
+```{r}
+# Revenue over time
+ggplot(df, aes(x = date, y = revenue)) +
+  geom_line(color = "peru") +
+  theme_minimal() +
+  labs(title = "Revenue Over Time", x = "Date", y = "Revenue")
+```
+
+```{r}
+# Profit margin by region
+ggplot(df, aes(x = region, y = Profit_Margin, fill = region)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Margins by Region", y = "Profit Margin")
+```
+
+```{r}
+datatable(df, options = list(pageLength = 10, autoWidth = TRUE))
+```
