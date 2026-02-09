@@ -1,0 +1,119 @@
+---
+title: "visNetwork"
+format: html
+editor: visual
+---
+
+# **How to Use visNetwork — Visualizing Network Data and Relationships in R Programming**
+
+## Visualizing data is essential for highlighting business activity. A visual graph like visNetwork can light the way for R programming data.
+
+Network visualization is becoming increasingly important for understanding how entities connect and interact. Whether you’re analyzing customer relationships, supply chains, or organizational hierarchies, seeing these connections visually can reveal patterns that numbers alone cannot. The visNetwork package provides an intuitive way to create these interactive visualizations directly from R without requiring JavaScript expertise.
+
+## **What is visNetwork?**
+
+visNetwork is an R wrapper around the vis.js JavaScript library. It lets you build interactive network diagrams by passing two simple data frames to a function — one for nodes (the individual entities) and one for edges (the connections between them). The resulting visualization is designed for interaction: you can drag nodes around, zoom, and click to explore relationships. The key advantage is that visNetwork handles all the JavaScript complexity for you, so you can continue working in R.
+
+## **Getting Started: The Minimal Node-Edge Example**
+
+Installing visNetwork is the same as any other package in your R programming, using the *library()* function to call it.
+
+```{r}
+install.packages("visNetwork")
+library(visNetwork)
+```
+
+Your script needs two pieces of information to leverage the visNetwork functions: a nodes data frame and an edges data frame.
+
+Here’s the simplest example of creating both data frames:
+
+```{r}
+nodes <- data.frame(id = 1:3)
+edges <- data.frame(from = c(1,2), to = c(1,3))
+visNetwork(nodes, edges, width = "100%")
+```
+
+The syntax creates a data frame object of three nodes with IDs 1, 2, and 3. The id parameter is required—it's how visNetwork identifies each node. You can think of nodes as the "things" you want to visualize in your graph: people, products, tasks, locations, or any entities you want to visualize.
+
+Looking at edges, there is a data frame with two connections created. The from and to parameters are required—they specify which nodes are connected and the direction of the connection. Edges are the "relationships" between the nodes.
+
+This example creates a network with three nodes and two connections: The first edge connects from node 1 to node 1 (a self-loop, where a node points to itself). The second edge connects from node 2 to node 3. The visNetwork function leverages both data frames to create the visualization. Below is how the visualization appears in your RStudio viewer.
+
+Unlike most images created in the viewer, which are static, you can drag the nodes around to reposition them. The physics engine in vis.js handles the repulsion and attraction among the nodes automatically.
+
+## **Building Practical Networks**
+
+When forming either a node or an edge, you can provide labels using the label parameter. In the example below, there are labels for the customers and organization teams like the Sales Team and Product Demo. The Edge labels describe a relationship status such as Outreach and Qualified.
+
+Here is what the syntax and the resulting graph from the visNetwork() function looks like:
+
+```{r}
+# Building practical networks
+nodes <- data.frame(
+  id = 1:6,
+  label = c("Sales Team", "Customer A", "Customer B", "Customer C", "Product Demo", "Contract"),
+  groupe = c("Team", "Customer", "Customer", "Customer", "Process", "Outcome"),
+  title = c("Sales Team", "High-value prospect", "Mid-market prospect", "New prospect", "Demo interaction", "Signed deal")
+)
+
+edges <- data.frame(
+  from = c(1, 1, 1, 2, 3, 4, 5),
+  to = c(2, 3, 4, 5, 5, 5, 6),
+  label = c("initial contact", "initial contact", "initial contact", "demo scheduled", "demo scheduled", "interest shown", "won")
+)
+
+visNetwork(nodes, edges, width = "100%")
+```
+
+There are other parameters. The group parameter is a categorical classification that controls styling and color. The title parameter is more dynamic. It is a tooltip text that appears when you hover your mouse over a node, providing additional context without cluttering the main visualization. Here’s what is looks like:
+
+All of this creates a more meaningful network. Yet the network can be further enhanced with styling functions to make patterns jump out.
+
+## **Styling Functions: Adding Style and Color Coding**
+
+The power of network visualization lies partly in grouping and color. Using the pipe operator, you can chain styling functions, like the example below.
+
+```{r}
+
+visNetwork(nodes, edges, width = "100%") |> 
+  visNodes(shape = "box", font = list(size = 16)) |> 
+  visEdges(arrows = "to", smooth = FALSE) |> 
+  visGroups(groupname = "Team", color = "lightblue", shape = "circle") |> 
+  visGroups(groupname = "Customer", color = "lightgreen") |> 
+  visGroups(groupname = "Process", color = "lightyellow") |> 
+  visGroups(groupname = "Outcome", color = "lightcoral") |> 
+  visLayout(randomSeed = 42) |> 
+  visPhysics(stabilization = list(iterations = 200))
+```
+
+Here’s what each function does. The *visNodes()* function sets default node properties like shape and font size. The *visEdges()* function adds arrows to show direction. The *visGroups()* function lets you style each group differently—notice how we color-code by role. The *visLayout(*) function controls how the network positions itself, and the *visPhysics()* function adjusts the physics simulation that determines node placement.
+
+## **Making Networks Interactive**
+
+visNetwork shines when you add interactivity. In addition the title parameter, there are two particularly useful options. These are highlightNearest and nodesIdSelection, parameters of the visOptions() function. The first highlights connected nodes when you click one. The second adds a dropdown menu to select nodes by ID.
+
+Below is the syntax, with an image showing the noideIdSelection parameter in action.
+
+```{r}
+# networks are interactive
+
+visNetwork(nodes, edges, width = "100%") |> 
+  visNodes(shape = "box") |> 
+  visEdges(arrows = "to") |> 
+  visGroups(groupname = "Team", color = "lightblue", shape = "circle") |> 
+  visGroups(groupname = "Customer", color = "lightgreen") |> 
+  visGroups(groupname = "Process", color = "lightyellow") |> 
+  visGroups(groupname = "Outcome", color = "lightcoral") |> 
+  visOptions(
+    highlightNearest = TRUE,
+    nodesIdSelection = TRUE
+  )
+```
+
+## **Next Steps**
+
+The visNetwork package includes numerous additional features. You can add legends using the *visLegend()* function, cluster nodes together, and create hierarchical layouts. For Shiny applications, the package offers the *visNetworkOutput()* and the *renderVisNetwork()* functions for interactive dashboards.
+
+For more details on the package, check the full vignette. You can access it by typing *vignette(“Introduction-to-visNetwork”*).
+
+visNetwork transforms network data from abstract ideas to revealed insights. By making relationships visible and interactive, the visNetwork package helps you ask better questions and spot opportunities that tables never reveal.
