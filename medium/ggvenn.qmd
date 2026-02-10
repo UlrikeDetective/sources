@@ -1,0 +1,83 @@
+---
+title: "ggvenn"
+format: html
+editor: visual
+---
+
+# **Understanding Business Value with ggvenn: Visualize Set Relationships in R Programming**
+
+## The ggvenn package brings simplicity to Venn diagram creation within the ggplot2 ecosystem, making set relationship analysis accessible for business decisions
+
+A newer package, ggvenn, offers a solution by integrating Venn diagram capabilities directly into the ggplot2 framework. The benefit of the ggvenn package is to allow set relationship visualization to be treated as a standard ggplot layer. This streamlines the workflow from data preparation to presentation, making it easier to communicate insights to stakeholders.
+
+## **Syntax of ggvenn**
+
+The ggvenn package operates with straightforward syntax that fits naturally into ggplot2 workflows. The main function you use in your code is the `geom_venn()` function. The `geom_venn()` function displays set relationships with overlapping regions, showing both unique and shared elements across up to four sets.
+
+```{r}
+install.packages("ggvenn")
+```
+
+The package accepts data in two formats: as a list of vectors or as a data frame with logical columns. This flexibility accommodates different data preparation workflows within business analytics environments.
+
+Here’s a basic example using segmented data. Three sets of customer lists are created: premium customers, loyalty members, and newsletter subscribers. The segments are converted to a list, which is then passed to the ggvenn function. The list within the function is used to carry the label of the diagram.
+
+```{r}
+library(ggvenn)
+library(ggplot2)
+
+# Create customer segment lists with realistic overlaps
+
+premium_customers <- c("CustomerA", "CustomerB", "CustomerC", "CustomerD", "CustomerE")
+loyalty_members <- c("CustomerB", "CustomerD", "CustomerF", "CustomerG", "CustomerH")
+newsletter_subscribers <- c("CustomerC", "CustomerD", "CustomerF", "CustomerI", "CustomerJ")
+
+# Organize into a named list
+segments <- list(
+  Premium = premium_customers,
+  Loyalty = loyalty_members,
+  Newsletter = newsletter_subscribers
+)
+
+# Create the Venn diagram using ffven function
+ggvenn(segments, c("Premium", "Loyalty", "Newsletter"))
+```
+
+## **Customizing Visuals for Stakeholder Presentations**
+
+The ggvenn package integrates with ggplot2’s customization capabilities, allowing you to adjust colors, labels, and styling to match corporate branding or presentation requirements.
+
+The `fill_color` parameter accepts hex codes or named colors, making it simple to align with brand guidelines. The `stroke_size` and `set_name_size` parameters adjust visual prominence for different presentation contexts — larger values for conference presentations, smaller for detailed reports.
+
+To take a look at how this appears, let's start with a datafroam of customer IDs, spend, purchase count, and days since last purchase. Then the data can be categorized each of the customers as a high value customer, a frequent customer, and a recent customer based on filters applied to the columns in the customer dataframe. Finally, lists are created so that the information can be inserted into the *ggvenn()* function as a parameter.
+
+Here is what that dataframe and the subsequent list look like
+
+```{r}
+# sample customer data
+
+customer_data <- data.frame(
+  customer_id = c("C001", "C002", "C003", "C004", "C005", "C006", "C007", "C008", "C009", "C010"),
+  total_spend = c(6200, 3400, 8900, 5800, 2100, 4800, 7200, 1800, 3200, 9100),
+  purchase_count = c(25, 28, 32, 18, 8, 22, 15, 12, 24, 35),
+  days_since_purchase = c(15, 8, 35, 22, 60, 12, 45, 50, 18, 25)
+)
+
+# Identify segments using customer IDs
+high_value <- customer_data$customer_id[customer_data$total_spend > 5000]
+frequent <- customer_data$customer_id[customer_data$purchase_count > 20]
+recent <- customer_data$customer_id[customer_data$days_since_purchase > 30]
+
+customer_segments <- list(
+  HighValue = high_value,
+  Frequent = frequent,
+  Recent = recent
+)
+
+ggvenn(customer_segments,
+       fill_color = c("#FF6B6B", "#4ecdc4", "#45b7d1"),
+       stroke_size = 1.5,
+       set_name_size = 5)
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
