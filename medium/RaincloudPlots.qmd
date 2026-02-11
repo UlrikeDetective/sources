@@ -1,0 +1,140 @@
+---
+title: "Raincloud Plots"
+format: html
+editor: visual
+---
+
+# **How to Create Raincloud Plots with ggrain for R Programming**
+
+## Richer insights from data distributions are possible with this latest package for data analysis
+
+Raincloud plots solve this kind of presentation challenge. They combine the quality of violin plots and boxplots to provide visualizations that address summary statistics and supporting insights.
+
+The package carrying raincloud plot is a new one called *ggrain*. The *ggrain* package combines three essential visual elements — individual data points, distribution density, and summary statistics — into a single, comprehensive view. Instead of choosing between showing overall trends or individual details, you can present both simultaneously. For organizations making decisions based on performance distributions, customer behavior patterns, or quality control metrics, raincloud plots reveal the complete data story that summary statistics alone can’t tell.
+
+## **Understanding Raincloud Plots**
+
+Raincloud plots combine raw data points with two visualizations — violin plots that show data distribution and boxplots for displaying quartiles and outliers. The name raincloud comes from the visual appearance of the overall plot: the density curve resembles a cloud, while the individual points below look like falling rain.
+
+Traditional visualizations force you to choose between showing aggregate patterns or individual observations. Bar charts show means but hide variability. Scatter plots show individual points but obscure overall trends. Boxplots reveal quartiles but can mask multimodal distributions where data clusters in multiple groups. Raincloud plots eliminate this trade-off by layering multiple visualization types.
+
+The approach matters for business decisions because distributions often reveal operational realities that averages would otherwise obscure. A customer service team might show an average response time of 3 minutes, but a raincloud plot could reveal two distinct clusters: 80% of responses in under 2 minutes and 20% taking over 5 minutes. That bimodal distribution suggests different issues requiring different solutions — perhaps certain query types need specialized handling, or specific team members need additional training.
+
+## **Installing and Loading ggrain**
+
+The ggrain package requires ggplot2 as its foundation, building on the grammar of graphics framework for data visualization. So for a library liosting in a script, the *library()* function calls load both ggplot2 (required for the base plotting system) and ggrain (providing the specialized *geom_rain* function) into your R session.
+
+```{r}
+# install.packages("ggrain")
+install.packages("remotes")
+remotes::install_github("erocoar/gghalves")
+```
+
+libraries
+
+```{r}
+library(ggplot2)
+library(ggrain)
+```
+
+## **Creating Your First Raincloud Plot**
+
+The simplest raincloud plot requires just the *geom_rain* function added to your ggplot call. We’ll use the built-in iris dataset to demonstrate the basic syntax.
+
+```{r}
+ggplot(iris, aes(x = Species, y = Sepal.Width, fill = Species)) +
+  geom_rain() +
+  theme_minimal() +
+  labs(
+    title = "Sepal Width Distribution by Iris Species",
+    x = "Species",
+    y = "Sepal Width (cm)"
+  )
+```
+
+The *ggplot()* function initializes the plot with the iris dataset and establishes aesthetic mappings through *aes()*. Setting *x = Species* creates categories along the horizontal axis, while *y = Sepal.Width* determines the vertical position of data points. The *fill = Species* aesthetic colors each species distinctly, improving visual separation. The *geom_rain()* function generates all three visualization components—violin plot, boxplot, and individual points—automatically.
+
+The function handles positioning, scaling, and layering without requiring manual adjustments, making it straightforward to create publication-quality visualizations. The *theme_minimal()* reduces visual clutter by removing unnecessary grid lines, and *labs()* adds clear axis labels and titles that make the plot self-explanatory for stakeholders.
+
+## **Customizing Individual Components**
+
+Each element of a raincloud plot can be customized independently through specialized argument lists. This granular control lets you emphasize specific aspects of your data story.
+
+```{r}
+ggplot(iris, aes(x = Species, y = Sepal.Width, fill = Species)) +
+  geom_rain(
+    alpha = 0.5,
+    violin.args = list(alpha = 0.3, color = NA),
+    boxplot.args = list(outlier.shape = NA),
+    point.args = list(size = 1.5, alpha = 0.6)
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Sepal Width Distribution by Iris Species",
+    x = "Species",
+    y = "Sepal Width (cm)"
+  )
+```
+
+The *violin.args* parameter accepts a list of modifications for the density curve component. Setting *alpha = 0.3* makes the violin semi-transparent, preventing it from obscuring underlying points, while *color = NA* removes the outline for a cleaner appearance. The *boxplot.args* parameter controls the boxplot layer—here, *outlier.shape = NA* prevents double-plotting of outliers that already appear as individual points. The *point.args* parameter adjusts the raw data points, where *size = 0.5* makes them more visible and *alpha = 0.6* adds transparency to reveal overlapping observations. This layered customization approach gives you precise control over visual hierarchy, letting you emphasize the elements most relevant to your analysis while maintaining the comprehensive view that makes raincloud plots valuable.
+
+## **Adding a Covariate for Color Coding**
+
+When your analysis involves a third variable, ggrain can color individual points based on that covariate while maintaining group separation.
+
+```{r}
+ggplot(iris, aes(x = Species, y = Sepal.Width, fill = Species)) +
+  geom_rain(cov = "Sepal.Length") +
+  scale_color_viridis_c() +
+  theme_minimal() +
+  labs(
+    title = "Sepal Width Distribution by Iris Species",
+    x = "Species",
+    y = "Sepal Width (cm)"
+  )
+```
+
+The *cov* parameter specifies which variable should determine point colors. By setting *cov = "Sepal.Length"* , each point's color reflects its sepal length value, creating a gradient that reveals relationships between variables within each species group. The *scale_color_viridis_c()* function applies a perceptually-uniform color scale that remains interpretable for colorblind viewers and in grayscale printing. This approach is particularly valuable for business applications where you need to show how a secondary metric varies within performance groups—for example, showing how deal size (color) varies within sales rep performance tiers (x-axis groupings), or how customer satisfaction scores (color) distribute within different product categories (groups).
+
+## **Controlling Rain Direction and Position**
+
+Raincloud orientation affects how easily viewers can compare distributions across groups. The *rain.side* parameter provides flexible positioning options.
+
+```{r}
+ggplot(iris, aes(x = Species, y = Sepal.Width, fill = Species)) +
+  geom_rain(rain.side = "l") +
+  theme_minimal() +
+  labs(
+    title = "Sepal Width Distribution by Iris Species",
+    x = "Species",
+    y = "Sepal Width (cm)"
+  )
+```
+
+The *rain.side* parameter accepts four values that control component positioning: "r" (right, the default) places density curves to the right of center, "l" (left) mirrors them to the left, "f" (flanking) creates symmetric raincloud plots with distributions on both sides, and "f1x1" or "f2x2" create specialized paired comparisons. Left-facing plots can improve readability when you have many groups, as the density curves don't overlap with axis labels on the right. Flanking configurations work well for before-after comparisons or paired data, showing both distributions simultaneously for direct visual comparison without requiring separate plot panels.
+
+## **Working with Paired Data**
+
+Paired observations — like before-and-after measurements or test-retest data — require special handling to show the relationships between matched observations.
+
+```{r}
+ggplot(sleep, aes(x = group, y = extra, fill = group)) +
+  geom_rain(id.long.var = "ID") +
+  theme_minimal() +
+  labs(
+    title = "Sleep Study: Hours of Extra Sleep by Drug Group",
+    subtitle = "Lines connect the same individual and across conditions",
+    x = "Drug Group",
+    y = "Extra Hours of Sleep"
+  )
+```
+
+The *id.long.var* parameter identifies which variable contains the pairing information, allowing ggrain to draw connecting lines between matched observations. Setting *id.long.var = ID* tells the function to connect points sharing the same ID value, making individual trajectories visible within the aggregate distribution. These connecting lines reveal whether most individuals follow the group trend or if the aggregate pattern masks varied individual responses. For business applications, this matters when analyzing A/B test results where the same customers experience both conditions, or when tracking employee performance before and after training interventions. The paired visualization reveals whether changes are consistent across individuals or driven by specific subgroups.
+
+## **Adjusting Positioning and Width**
+
+Fine-tuning the spatial arrangement of raincloud components helps prevent overcrowding and improves visual clarity when working with multiple groups.
+
+```{r}
+
+```
