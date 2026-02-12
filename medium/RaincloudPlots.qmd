@@ -136,5 +136,41 @@ The *id.long.var* parameter identifies which variable contains the pairing infor
 Fine-tuning the spatial arrangement of raincloud components helps prevent overcrowding and improves visual clarity when working with multiple groups.
 
 ```{r}
-
+ggplot(iris, aes(x = Species, y = Petal.Length, fill = Species)) +
+  geom_rain(
+    boxplot.args.pos = list(width = 0.1, position = position_nudge(x = -0.2)),
+    violin.args.pos = list(side = "r", width = 0.7, position = position_nudge(x = 0.15))
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Petal Length with Adjusted Component Spacing",
+    x = "Species",
+    y = "Petal Length (cm)"
+  )
 ```
+
+The code creates the following plot. The *boxplot.args.pos* parameter controls boxplot positioning through two mechanisms: *width* determines the boxplot's horizontal extent (0.1 creates narrow boxes that don't dominate the plot), while *position_nudge(x = -0.2)* shifts the entire boxplot left by 0.2 units to prevent overlap with points.
+
+## **Handling Categorical Data with Likert Scales**
+
+Survey data and Likert-scale responses create unique visualization challenges because values are discrete rather than continuous. The ggrain package includes specific handling for these data types.
+
+```{r}
+survey_data <- data.frame(
+  response = sample(1:5, 200, replace = TRUE, prob = c(0.1, 0.2, 0.4, 0.2, 0.1)),
+  department = rep(c("Sales", "Marketing", "Operations", "IT"), each = 50)
+)
+
+ggplot(survey_data, aes(x = department, y = response, fill = department)) +
+  geom_rain(likert = TRUE) +
+  scale_y_continuous(breaks = 1:5, labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strondly Agree"))
+
+theme_minimal() +
+  labs(
+    title = "Employee Satisfaction by Department",
+    x = "Department",
+    y = "Satisfaction level"
+  )
+```
+
+The *likert = TRUE* parameter activates specialized handling for discrete, ordered categorical data. This setting adds vertical jitter to points that would otherwise stack directly on top of each other at integer values, making individual responses visible while maintaining their categorical nature. The jittering is constrained to prevent points from appearing at impossible values (like 2.5 on a 1-5 scale), preserving the interpretability of the ordinal scale. The *scale_y_continous()* function replaces numeric axis labels with meaningful category names, making the plot immediately understandable for non-technical stakeholders. For organizations analyzing employee surveys, customer satisfaction scores, or Net Promoter Score distributions, this feature transforms unusable stacked-point charts into informative visualizations that reveal both group tendencies and response variability.
