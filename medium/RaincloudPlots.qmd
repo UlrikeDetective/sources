@@ -174,3 +174,85 @@ theme_minimal() +
 ```
 
 The *likert = TRUE* parameter activates specialized handling for discrete, ordered categorical data. This setting adds vertical jitter to points that would otherwise stack directly on top of each other at integer values, making individual responses visible while maintaining their categorical nature. The jittering is constrained to prevent points from appearing at impossible values (like 2.5 on a 1-5 scale), preserving the interpretability of the ordinal scale. The *scale_y_continous()* function replaces numeric axis labels with meaningful category names, making the plot immediately understandable for non-technical stakeholders. For organizations analyzing employee surveys, customer satisfaction scores, or Net Promoter Score distributions, this feature transforms unusable stacked-point charts into informative visualizations that reveal both group tendencies and response variability.
+
+## **Integrating with ggplot2 Themes and Scales**
+
+Raincloud plots integrate seamlessly with ggplot2’s theming system and scale modifications, maintaining consistency with your organization’s visual standards.
+
+```{r}
+ggplot(iris, aes(x = Species, y = Petal.Width, fill = Species)) +
+  geom_rain(
+    alpha = 0.6,
+    violin.args = list(alpha = 0.4, color = "white", linewidth = 0.5),
+    point.args = list(size = 1, alpha = 0.7)
+  ) +
+  scale_fill_manual(values = c("#2e86ab", "#a23b72", "#f18f01")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 12),
+    legend.position = "bottom",
+    panel.grid.minor = element_blank()
+  ) +
+  labs(
+    title = "Pedal Width Distribition across Iris Species",
+    subtitle = "Raincloud visualization showing distribution, quartiles, and individual measurements",
+    x = "Species",
+    y = "Petal Width (cm)",
+    caption = "Data source: Fisher's Iris dataset"
+  )
+```
+
+The s*cale_fill_manual()* function applies custom colors that match corporate branding guidelines, replacing ggplot2's default color palette with specific hex values. The *theme()* function modifies specific plot elements: *plot.title* increases title size and adds bold formatting for emphasis, axis.title ensures readable axis labels, *legend.position = "bottom"* moves the legend to prevent obscuring data, and *panel.gird.minor = element_blank()* removes minor grid lines that add clutter without improving interpretability. The *labs()* function adds a subtitle explaining what viewers see and a caption documenting data sources, which matters for reproducibility and establishing credibility with stakeholders. This comprehensive styling approach ensures your raincloud plots maintain visual consistency with other reports while meeting publication standards for presentations, white papers, or research documents.
+
+## **Comparing Multiple Groups with Faceting**
+
+When you need to compare distributions across multiple categorical dimensions simultaneously, faceting creates small multiples that maintain visual clarity.
+
+The code below creates a sample data frame of revenue for each region, then creates a visualization displaying each group via faceting.
+
+```{r}
+set.seed(123)
+performance_data <- data.frame(
+  region = rep(c("North", "South", "East", "West"), each = 75),
+  quarter = rep(rep(c("Q1", "Q2", "Q3"), each = 25), 4),
+  revenue = c(
+    rnorm(75, mean = 50000, sd = 8000), # North
+    rnorm(75, mean = 45000, sd = 7000), # south
+    rnorm(75, mean = 55000, sd = 9000), # east
+    rnorm(75, mean = 48000, sd = 7500) # west
+  )
+)
+
+ggplot(performance_data, aes(x = quarter, y = revenue, fill = quarter)) +
+  geom_rain(alpha = 0.5) +
+  facet_wrap(~ region, ncol = 2) +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(face = "bold", size =11),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  labs(
+    title = "Quarterly Revenue Distribution by Region",
+    x = "Quarter",
+    y = "Revenue",
+    fill = "Quarter"
+  )
+```
+
+The *facet_wrap()* function creates separate panels for each region, using `~ region` to specify the faceting variable and *ncol = 2* to arrange panels in a two-column grid. This layout enables direct comparison of quarterly patterns across regions without cramming all distributions into a single crowded plot. The *scales::dollar_format()* function formats y-axis labels as currency, improving readability for business stakeholders who think in dollar amounts rather than scientific notation. The *strip.text* theme modification increases facet label size and adds bold formatting so readers can easily identify which panel shows which region. This multi-panel approach scales well when you need to compare patterns across time periods, product lines, customer segments, or geographic regions—common requirements in business analytics where understanding variation across multiple dimensions drives strategic decisions.
+
+## **Practical Applications for Business Analysis**
+
+Raincloud plots solve specific visualization challenges across multiple business domains. Understanding when they provide unique value helps you choose the right tool for your analytical needs.
+
+**Quality Control and Manufacturing**: When monitoring product specifications, raincloud plots reveal whether variation stays within acceptable limits and whether the distribution shifts over time. A manufacturing process might show acceptable average dimensions but hide a bimodal distribution indicating two distinct machine settings that need alignment.
+
+**Sales Performance Analysis**: Traditional bar charts showing average sales per rep obscure the distribution of deal sizes and rep consistency. Raincloud plots reveal whether high average performance comes from consistent mid-level deals or from landing occasional large contracts interspersed with dry periods.
+
+**Customer Experience Metrics**: Survey responses often show ceiling effects where most scores cluster at the top but a small group of detractors drives down the average. Raincloud plots make these subgroups visible, helping you understand whether you need broad improvements or targeted interventions for specific customer segments.
+
+**Clinical and Health Data**: Medical research frequently involves comparing treatment effects where individual variation matters as much as group differences. Raincloud plots show whether a treatment produces consistent benefits across patients or helps only specific subgroups.
+
+**A/B Testing Results**: When comparing conversion rates or user engagement metrics across test variants, raincloud plots reveal whether observed differences represent genuine effects or result from a few extreme observations that skew the means.
