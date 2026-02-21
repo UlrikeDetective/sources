@@ -1,0 +1,469 @@
+---
+title: "Easyviz"
+format: html
+editor: visual
+---
+
+# **How to Use easyViz: Elevating Regression Visualization To Address Conditional Effects on Models**
+
+## A new R programming package allows for more nuanced analysis of a regression. See how it can enhance a business analysis.
+
+## **What easyViz Actually Does**
+
+easyViz is a flexible visualization package that displays conditional effects from regression models. Rather than forcing you to manually extract predictions and wrestle with prediction intervals, you provide your fitted model, specify a predictor, and easyViz generates publication-quality plots with raw data, prediction lines, and confidence intervals — all automatically formatted and customizable.
+
+The package works with an impressive range of model types: standard linear models via *lm()* , robust models from *rlm()*, generalized linear models (*glm(), glm.nb()* ), nonlinear models (*nls()* ), generalized least squares *(gls()* ), and mixed-effects models including *lmer(), glmer(), glmnTMB(),* and *gam()* . This breadth means you can use easyViz across your entire modeling toolkit without learning separate visualization approaches.
+
+But the real power comes in the parameters that let you visualize conditional effects — the relationships between predictors and outcomes across different contexts. That’s where standard regression approaches become limiting.
+
+```{r}
+install.packages("easyViz")
+library(easyViz)
+```
+
+## **The Parameters That Elevate Your Analysis**
+
+There are a few parameters built in the *easyViz()* function that you should pay the most attention to understand your visual options best.
+
+## **The `by` Parameter: Conditional Effects Across Categories**
+
+The *by* parameter is a core useful parameter within easyViz. Rather than collapsing your data into a single prediction line, you specify a second variable—either continuous or categorical—and easyViz visualizes how your primary relationship changes across that variable's values.
+
+This example displays a regression model of sales, using marketing spend and segment as independent variables. Lines 8 through 34 are meant to create the supporting data — the regression appears in line 35.
+
+The dataframe created to make the customer_data object holds the data called through the parameters of the *easyViz()* function. The *marketing \_spend* and *revenue* objects are based on a random distribution, using *pmax()* to ensure that all the observations are positive values.
+
+```{r}
+# Fit a model examining sales by marketing spend and customer segment
+# First create the data
+set.seed(42)
+
+# Create customer segment variable with 3 levels
+segment <- factor(rep(c("Premium", "Standard", "Budget"), times = c(80, 70, 50)))
+
+# Marketing spend (varies by segment - Premium gets more investment)
+marketing_spend <- ifelse(segment == "Premium", 
+     rnorm(80, mean = 5000, sd = 1500),
+     ifelse(segment == "Standard",
+     rnorm(70, mean = 3000, sd = 1200),
+     rnorm(50, mean = 1500, sd = 800)))
+
+marketing_spend <- pmax(marketing_spend, 100)
+```
+
+The *easyViz()* function has several parameters. It starts with the regression (*sales_model* in the example)and the data frame containing the regression data (*customer_data*).
+
+Below is the visual from the *easyViz()* function. Each line represents each segment identified within the *by* parameter. This approach reveals whether marketing spend effectiveness differs across customer segments
+
+```{r}
+# Revenue with segment-dependent relationships
+# Key: Marketing ROI differs by segment (conditional effect)
+revenue <- ifelse(segment == "Premium",
+                  5000 + 2.5 * marketing_spend + rnorm(80, sd = 3000),
+                  ifelse(segment == "Standard",
+                         2500 + 1.8 * marketing_spend + rnorm(70, sd = 2500),
+                         1000 + 0.9 * marketing_spend + rnorm(50, sd = 1500)))
+
+revenue <- pmax(revenue, 100)
+
+customer_data <- data.frame(
+  revenue = revenue,
+  marketing_spend = marketing_spend,
+  segment = segment
+)
+
+sales_model <- lm(revenue ~ marketing_spend + segment, 
+                  data = customer_data)
+
+# Visualize marketing effect separately for each segment
+easyViz(model = sales_model, 
+        data = customer_data, 
+        predictor = "marketing_spend",
+        by = "segment",
+        pred_on_top = TRUE,
+        pred_line_col = c("red", "blue", "green"),
+        xlab = "Marketing Spend ($)",
+        ylab = "Revenue ($)")
+
+```
+
+### **What business insights are being revealed**
+
+The visualization holds a variety of inisghts from the observatoons and how they are graphed. The basic observations are scattered gray dots, repreenting the actual customer observations. The positions are revealing the real variation in the data:
+
+-   Some customers generated more/less revenue than the model predicts (natural variation)
+
+-   The clustering shows where your customer density actually exists
+
+-   The spread shows the uncertainty — prediction confidence intervals
+
+The trend lines drawn reveal how the model is derriving potential segments from the observations:
+
+**Red line (Budget segment)**: A budget customer segment shows minimal revenue response to increased marketing spend. Going from \$2,000 to \$8,000 in marketing spend only increases revenue by roughly \$4,000–5,000. **The** **ROI opportunity is the least valuable among the three estimates.** This segment is price-sensitive and generates lower lifetime value.
+
+**Green line (Standard segment)**: Standard customers show moderate responsiveness. The same \$6,000 increase in marketing spend generates approximately \$10,000–12,000 in additional revenue. The **ROI opportunity is reasonable.** This is your middle-market customers who have decent purchasing power.
+
+**Blue line (Premium segment)**: Premium customers are highly responsive to marketing investment. That same \$6,000 increase in marketing spend generates roughly \$15,000–20,000 in additional revenue. The **ROI is the most valuable among the three estimates.** These high-value customers convert marketing investment into disproportionate revenue.
+
+For a continuous *by* variable like *time_period*, easyViz automatically conditions at the 10th, 50th, and 90th percentiles—a realistic representation of how effects change across your actual data distribution rather than arbitrary points.
+
+The conditional effect visualization is essential because business reality rarely involves universal relationships. Marketing effectiveness for high-value customers often differs from budget accounts. Operational efficiency gains from process improvements depend on department type. By conditioning on relevant variables, you communicate not just what the relationship is, but whether it holds consistently across your business contexts.
+
+## **Handling Mixed-Effects Models: `re_form` for Population vs. Group-Specific Effects**
+
+If your data comes from nested structures — customers within regions, students within schools, measurements within individuals — you’re probably using mixed-effects models. The *re_form* parameter controls whether your visualization shows population-level effects or group-specific conditional effects.
+
+This distinction helps in understanding how the data and results are interpreted. Population-level effects tell you the “average” relationship and provide the most stable inference. Group-specific effects show you where your model predicts variation within actual groups in your data. For regional business applications, you often want both perspectives: the overall trend for strategy, and regional-specific predictions for implementation.
+
+In this example, the customer panel data object is created, with regions, estinamated churn using *rbinom()* diustribution, an engagement score with boundaries using the *pmax()* function.
+
+```{r}
+###########
+# Handlng Mix-Effect Models
+set.seed(123)
+n_customers <- 300
+## Create region variable - 30 customers in each of 10 regions
+regions <- rep(c("Northeast", "Southeast", "Midwest", "Southwest", 
+                 "Northwest", "Central", "Pacific", "Atlantic", "Mountain", "Lakes"), times = 30)
+
+## Create engagement score - continuous 0-100 scale
+## Using rnorm to create realistic variation around a mean of 50
+engagement_score <- rnorm(n_customers, mean = 50, sd = 15)
+## Bound between 0-100 to ensure realistic business values
+engagement_score <- pmax(pmin(engagement_score, 100), 0)
+
+## Create random regional effects on churn
+## Some regions naturally have higher/lower churn rates due to r
+region_effects <- rnorm(10, mean = 0, sd = 0.15)
+names(region_effects) <- unique(regions)
+
+## Calculate churn probability based on engagement and region
+## Higher engagement reduces churn probability (negative relationship)
+## Different regions have different baseline churn rates (random intercepts)
+churn_prob <- plogis(-2 - 0.05 * engagement_score + region_effects[regions])
+
+## Generate binary churn outcome
+## 1 = customer churned, 0 = customer retained
+churn <- rbinom(n_customers, size = 1, prob = churn_prob)
+
+## Assemble the final dataset
+customer_panel <- data.frame(churn = churn, engagement_score = engagement_score, region = factor(regions))
+
+head(customer_panel, 15) ## Display basic dataset information
+str(customer_panel) ## Check the data structure
+summary(customer_panel) ## Summary statistics across all variables
+table(customer_panel$region) ## See how many customers are in each region
+
+## Calculate churn rate by region to see regional variation
+churn_by_region <- aggregate(churn ~ region, data = customer_panel, 
+                             FUN = function(x) round(mean(x), 3))
+print(churn_by_region)
+
+range(customer_panel$engagement_score) ## Overall engagement score range
+mean(customer_panel$churn) ## Overall churn rate across all regions
+
+library(lme4) # for the lmer function
+regional_model <- lmer(churn ~ engagement_score + (1 | region), data = customer_panel)
+```
+
+The model created with the *lmer()* function via the lme4 package instead of the *lm()* function. The *lmer()* function is meant to address data that has been groouped together, such as the customers in this example. Customers within the same region are not statistically independent, which a lm(0 functio wouold assume. The lmer((
+
+```{r}
+# Population-level prediction (average across all regions)
+easyViz(model = regional_model, 
+        data = customer_panel, 
+        predictor = "engagement_score",
+        re_form = NA,
+        ylab = "Probability of Churn",
+        plot_args = list(main = "Overall Effect of Engagement on Churn"))
+```
+
+First, the horizontal lines of dots in the visualization represent the **actual** binary outcome data. The dots **at 1.0 (top) represents** customers who churned (churn = 1). The dots at 0.0 (bottom) represents customers who retained (churn = 0).
+
+These data ponts are scattered horizontally because every observation is either exactly 0 or exactly 1. The jittering (slight vertical scatter) in each line comes from the *easyViz* function just to prevent overplotting so you can see how many data points exist at each engagement level rather than them all stacking on top of each other invisibly.
+
+Second, let’s look at the messaging of the overall visualization graph. It shows the overall average relationship between the engagement score and churn probability across all 10 regions combined. The black line represents the predicted churn probability as engagement increases from 20 to 100. The shaded gray band around it is the 95% confidence interval — showing the certainty range of those predictions against the model.
+
+The visualization shows that across the entire engagement spectrum (20–100), churn probability stays very low. Even customers with lower engagement (20–40) have minimal churn — they’re still mostly retained. This reflects realistic customer behavior where engagement is a protective factor against churn.
+
+The population-level view (*re_form = NA*) tells you: "On average, across all regions, engagement strongly protects against churn." The tight confidence band suggests this relationship is stable and reliable. If you then visualized with *re_form = NULL* and *by = "region"* , you'd see if this protective effect holds consistently in all regions or varies by geography—that's the conditional insight easyViz enables.
+
+## **Conditioning Numeric Predictors: `num_conditioning` for Multivariable Reality**
+
+When your model includes multiple predictors, visualizing one predictor requires holding others constant. The *num_conditioning* parameter controls whether you fix continuous predictors at their median or mean.
+
+The image below is a setup for the data to be used for a regression called *performance_model*. The data is created from a normal distribution and limited by *pmax()* function. You will likely import data from an API or spreadsheet, but for this example, distributions were used to form the example data that is placed in the dataframe for the model.
+
+The model is meant for discovering what factors influence the quarterly output.
+
+```{r}
+# Conditional Numeric predictors
+# Complex model with multiple predictors
+set.seed(456)
+
+n_obs <- 150
+
+## Create numeric predictors with realistic ranges
+labor_hours <- rnorm(n_obs, mean = 200, sd = 50)
+labor_hours <- pmax(labor_hours, 50)
+
+technology_investment <- rnorm(n_obs, mean = 100000, sd = 30000)
+technology_investment <- pmax(technology_investment, 20000)
+
+management_experience <- rnorm(n_obs, mean = 12, sd = 5)
+management_experience <- pmax(management_experience, 1)
+
+industry_volatility <- rnorm(n_obs, mean = 0.3, sd = 0.1)
+industry_volatility <- pmax(pmin(industry_volatility, 1), 0)
+
+## Generate quarterly output based on labor hours and other operational factors
+quarterly_output <- (200 + 1.5 * labor_hours + 0.00025 * technology_investment + 15 * management_experience - 
+                       100 * industry_volatility +
+                       rnorm(n_obs, sd = 30))
+
+quarterly_output <- pmax(quarterly_output, 50)
+
+operations_data <- data.frame(
+  quarterly_output = quarterly_output,
+  labor_hours = labor_hours,
+  technology_investment = technology_investment,
+  management_experience = management_experience,
+  industry_volatility = industry_volatility
+)
+
+## Fit model with multiple predictors
+performance_model <- lm(quarterly_output ~ labor_hours + technology_investment + management_experience + industry_volatility, data = operations_data)
+
+```
+
+Below is the model syntax for the *performance_model* object*,* as well asthe *easyViz* function that creates the model visual. You can see the *num_conditioning* parameter in the *easyViz()* function, set for the median.
+
+```{r}
+## Visualize labor effect at median values of other predictors
+easyViz(model = performance_model, 
+        data = operations_data, 
+        predictor = "labor_hours",
+        num_conditioning = "median",
+        ylim = c(0, 1500),
+        xlab = "Labor Hours",
+        ylab = "Quarterly Output (units)")  
+```
+
+The choice between median and mean in the *num_conditioning* parameter influences which visual yields a robust, consistent inisghts on which decisions can be made. The median is more robust to outliers and represents an actual data value more directly. For business audiences, “effect of labor hours at median technology investment” is more interpretable than “at mean technology investment” when your data contains extreme values.
+
+## **The `fix_values` Parameter: Precise Control for Custom Scenarios**
+
+Sometimes you need to visualize your effect at a specific value that’s strategically important — not the median or mean, but a particular business scenario.
+
+This is where the *fix_values* parameter is an aid. The *fix_values* parameter fixes other predictors at values that matter strategically. This lets you answer specific business questions by eaxt scanarios rather than defaulting to median/mean values.
+
+Here is an example of easyviz using customer data that reflects annual spending, customer age, and product category. There is a fix_value set to customers so that you have scenarios according to an established customer segment (customers with at least 5 years of engagement).
+
+Sample data is created for the example. Again this step has options: you can import as you see fit.
+
+```{r}
+set.seed(654)
+
+n_customers <- 200
+
+## Create product categories
+product_category <- factor(rep(c("Software", "Hardware", "Services"), 
+                               length.out = n_customers))
+
+## Customer tenure: how long they've been with the company (0.5 to 10 years)
+customer_age <- runif(n_customers, min = 0.5, max = 10)
+
+## Engagement score: customer interaction level (0-100)
+engagement <- rnorm(n_customers, mean = 60, sd = 15)
+engagement <- pmax(pmin(engagement, 100), 0)
+
+## Annual spending depends on tenure, engagement, and product category
+annual_spending <- ifelse(product_category == "Software",
+                          800 + 300 * customer_age + 18 * engagement + rnorm(n_customers, sd = 900),
+                          ifelse(product_category == "Hardware",
+                                 1200 + 280 * customer_age + 22 * engagement + rnorm(n_customers, sd = 1100),
+                                 1000 + 400 * customer_age + 25 * engagement + rnorm(n_customers, sd = 1200)))
+
+annual_spending <- pmax(annual_spending, 100)
+
+customer_data <- data.frame(
+  annual_spending = annual_spending,
+  customer_age = customer_age,
+  engagement = engagement,
+  product_category = product_category
+) 
+
+
+```
+
+Below is the model, a regression called ltv_model. Just below that is the easyViz visualization — note the *fix_values* parameter, which accepts a *c()* object containing what is meant to
+
+```{r}
+# Visualize customer lifetime value effect for a specific customer profile:
+# established customer (5 years), high engagement
+ltv_model <- lm(annual_spending ~ customer_age + engagement + product_category,
+                data = customer_data)
+
+easyViz(model = ltv_model, 
+        data = customer_data, 
+        predictor = "engagement",
+        fix_values = c(customer_age = 5),
+        by = "product_category",
+        pred_line_col = c("darkblue", "orange", "green"),
+        xlab = "Engagement Score",
+        ylab = "Annual Spending ($)")
+```
+
+This is where easyViz transforms from a visualization tool into a business intelligence tool. Rather than abstract statistical predictions, you’re answering specific questions: “How does engagement influence spending for customers we’ve retained for five years?” The *fix_values* parameter lets you ground your predictions in realistic business scenarios.
+
+## **`The pred_range_limit parameter`: Avoiding Extrapolation**
+
+When you condition on categorical variables using the *by* parameter, different categories might have different ranges of your main predictor. The *pred_range_limit* parameter controls whether predictions are extrapolated beyond observed data ranges.
+
+First sample data is created. Again this step has options: you can import as you see fit.
+
+```{r}
+# sales data
+set.seed(321)
+
+n_sales <- 400
+
+## Price variable with realistic product pricing
+price <- rnorm(n_sales, mean = 99, sd = 40)
+price <- pmax(price, 10)
+
+## Customer tier: premium customers less price-sensitive
+customer_tier <- factor(rep(c("Premium", "Standard"), times = c(200, 200)))
+
+## Purchase likelihood depends on price and tier
+## Premium customers less price-sensitive than standard
+purchase_prob <- ifelse(customer_tier == "Premium",
+                        plogis(2 - 0.015 * price),
+                        plogis(1.5 - 0.025 * price))
+
+purchase_likelihood <- rbinom(n_sales, size = 1, prob = purchase_prob)
+
+sales_data <- data.frame(
+  purchase_likelihood = purchase_likelihood,
+  price = price,
+  customer_tier = customer_tier
+)
+
+
+# Sales data where premium customers have different budgets than standard customers
+pricing_model <- glm(purchase_likelihood ~ price + customer_tier,
+                     family = binomial,
+                     data = sales_data)
+```
+
+The following is the pricing model, along woith the easyViz function. The *pred_range_limit* is set to TRUE.
+
+```{r}
+easyViz(model = pricing_model, 
+        data = sales_data, 
+        predictor = "price",
+        by = "customer_tier",
+        pred_range_limit = TRUE,  # Only predict where data exists for each tier
+        binary_data_type = "binned",
+        pred_line_col = c("red", "blue"),
+        xlab = "Price ($)",
+        ylab = "Purchase Probability")
+```
+
+With *pred_range_limit = TRUE,* premium customers' price effects only show across their actual price range, not the full range. This informatrion prevents you from presenting predictions in domains where you have no empirical grounding. It's a small detail that prevents a common analytical mistake: confidently predicting relationships outside your observed experience.
+
+## **Benefits Over Standard Regression Workflows**
+
+The specific parameters easyViz provides deliver concrete advantages:
+
+**Transparency in complex relationships**: Your visualization explicitly shows how effects differ across conditions rather than hiding variation in a single line. Stakeholders see not just the average effect, but its consistency or variability across important segments.
+
+**Confidence interval visualization**: Rather than reporting confidence intervals as numbers, easyViz renders them as shaded polygons or line ranges. This immediately communicates precision — wide confidence bands signal uncertainty; tight bands signal reliable estimates. Business audiences grasp this instantly.
+
+**Automatic handling of model complexity**: Whether your model includes interactions, polynomial terms, or random effects, easyViz extracts predictions correctly. You don’t manually code prediction equations or wrestle with *predict()* functions across different model classes.
+
+**Efficient exploration of high-dimensional relationships**: Want to explore three-way interactions? Combine *by* for one interaction variable with *fix_values* for another. Another option is to run multiple easyViz calls with different *fix_values* to visualize how the interaction changes across your third variable.
+
+**Foundation for communication**: easyViz produces plots suitable for presentations and reports immediately — customizable through *pred_line_col, ci_polygon_col,* and *point_col* for styling, while *add_legend* and *legend_position* are for annotation. These allow adjustments for you visualization work, making it more ready for stakeholder review.
+
+## **Another Example: Conditional Effects in Action**
+
+Here’s how easyViz elevates a typical regression analysis. let say we have some operational data, samples from an operation within in the
+
+```{r}
+# A complete example 
+# Craft operational data
+set.seed(789)
+n_obs <- 180
+
+## Create department variable - 20 observations per department
+departments <- factor(rep(paste0("Dept_", 1:9), times = 20))
+
+## Technology investment: continuous variable for plant/equipment
+tech_investment <- rnorm(n_obs, mean = 85000, sd = 25000)
+tech_investment <- pmax(tech_investment, 20000)
+
+## Training hours: continuous variable for employee development
+training_hours <- rnorm(n_obs, mean = 40, sd = 15)
+training_hours <- pmax(training_hours, 5)
+
+## Create random department effects (some departments naturally more productive)
+dept_effects <- rnorm(9, mean = 0, sd = 3)
+names(dept_effects) <- unique(as.character(departments))
+
+## Output per worker, based on tech investment, training, and interactions
+## Key: training effectiveness increases with technology investment (interaction)
+output_per_worker <- (
+  50 + 
+    0.0008 * tech_investment + 
+    1.2 * training_hours + 
+    0.00001 * tech_investment * training_hours +
+    dept_effects[as.character(departments)] +
+    rnorm(n_obs, sd = 4)
+)
+output_per_worker <- pmax(output_per_worker, 20)
+
+## Assemble the dataset
+operations_sample <- data.frame(
+  output_per_worker = output_per_worker,
+  tech_investment = tech_investment,
+  training_hours = training_hours,
+  department = departments
+)
+
+# Fit model: predict productivity from technology investment, 
+# with interactions and random department effects
+productivity_model <- lmer(
+  output_per_worker ~ tech_investment * training_hours + 
+    (1 | department),
+  data = operations_sample
+)
+
+```
+
+This single visualization communicates the effect of technology investment on productivity, how that effect changes at different training intensities, the uncertainty around each prediction, and the relationship across actual departments. A traditional *plot()* call on an *ellmer()* object can’t deliver this.
+
+```{r}
+# Standard approach: single prediction line
+# This hides whether training effectiveness differs by tech investment level
+
+# easyViz approach: conditional effects
+easyViz(model = productivity_model,
+        data = operations_sample,
+        predictor = "tech_investment",
+        by = "training_hours",  # Show effect at different training levels
+        re_form = NA,            # Population-level (average department)
+        pred_on_top = TRUE,
+        pred_line_col = c("red", "orange", "green"),
+        ci_polygon_col = c(rgb(1,0,0,0.2), 
+                           rgb(1,0.5,0,0.2), 
+                           rgb(0,1,0,0.2)),
+        xlab = "Technology Investment ($)",
+        ylab = "Output per Worker (units)",
+        add_legend = TRUE,
+        legend_position = "topleft",
+        legend_labels = c("Low Training", "Medium Training", "High Training"))
+
+```
+
+#### 
