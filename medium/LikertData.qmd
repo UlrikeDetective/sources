@@ -1,0 +1,70 @@
+---
+title: "Survey Data - LikertData"
+format: html
+editor: visual
+---
+
+# **Analyzing Your Survey Data in R Programming: The Likert Package for Business Owners**
+
+## Surveys are a vital tool for understanding customer sentiment. Here’s how to quantify that analysis in R programming
+
+## You’ve sent out a customer satisfaction survey, an employee engagement questionnaire, or a product feedback form. The responses are now sitting in a Google Sheet or Excel file, and you’re staring at hundreds of rows of data, wondering how to make sense of it all. If your survey uses a rating scale — “Very Satisfied” to “Very Unsatisfied,” “Strongly Agree” to “Strongly Disagree” — you’re working with what data analysts call the Likert scale. The good news: R makes this remarkably straightforward.
+
+## **Why Likert Scale Analysis Matters for Your Business**
+
+Think of Likert analysis as a translator. Your raw survey responses tell an important story, but that story lives in scattered data points. A proper Likert analysis converts that noise into clear, visual insights you can share with stakeholders. Instead of saying “we have 847 survey responses,” you can say “72% of customers are satisfied or very satisfied, concentrated primarily in the Northeast region.” That specificity drives decisions.
+
+Most business owners avoid analyzing survey data because the process seems technical. Between importing spreadsheets, transforming data formats, and wrestling with visualization tools, the effort-to-insight ratio feels unfavorable. The likert package in R eliminates this friction.
+
+## **Getting Your Survey Data Into R**
+
+If your survey lives in Google Sheets, you have two efficient paths. First, you can export your spreadsheet directly as a CSV file and import it into R using the simple *read.csv()* function. The second method is using the googlesheets4 package, which connects directly to your Google Sheet without downloading anything. This approach is particularly valuable if you have collected continuous feedback — the R analysis stays synchronized with your live data.
+
+For Excel files, the readxl package handles import seamlessly. The syntax below shows an import of an example dataset:
+
+```{r}
+library(readxl)
+survey_data <- read_excel("RawData.xlsx")
+
+survey_data
+```
+
+## **Installing and Loading the Likert Package**
+
+The installation follows in one of two ways — either via the Packages panel in RStudio (or similar for Positron) or via the install.packages() function. Here is the latter, calling the library on line two:
+
+```{r}
+# install.packages("likert")
+library(likert)
+library(dplyr)
+```
+
+The *likert* package sits on top of ggplot2’s visualization foundation, inheriting the same clean, professional aesthetic that data-driven organizations expect. This package transforms raw survey response data into publication-ready visualizations and statistical summaries.
+
+## **Preparing Your Survey Data**
+
+The *likert* package expects your data in a specific format: each row represents a respondent, and each column represents a survey question. The responses should be factors (categorical data) with ordered levels — for example, “Strongly Disagree,” “Disagree,” “Neutral,” “Agree,” “Strongly Agree.”
+
+```{r}
+colnames(survey_data)
+```
+
+#### unique values
+
+```{r}
+unique(survey_data$`Variety of food`)
+unique(survey_data$`Room cleanliness`)
+unique(survey_data$`Broadband & TV`)
+unique(survey_data$`Food quality`)
+```
+
+```{r}
+survey_clean <- survey_data |> 
+  select(`Variety of food`, `Room cleanliness`, `Broadband & TV`, `Food quality`) |> 
+  mutate(across(everything(),
+                factor,
+                levels = c("Excellent", "Very good", "Good", "Average", "Poor"),
+                ordered = TRUE))
+likert_result <- likert(survey_clean)
+plot(likert_result)
+```
