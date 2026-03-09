@@ -10,12 +10,12 @@ regions = ["North", "South", "East", "West"]
 
 # Create 30 rows of data
 data = {
-    "Respondent_ID": range(1, 31),
-    "question_1": np.random.choice(levels, 30),
-    "question_2": np.random.choice(levels, 30),
-    "question_3": np.random.choice(levels, 30),
-    "question_4": np.random.choice(levels, 30),
-    "Region": np.random.choice(regions, 30)
+    "Respondent_ID": range(1, 131),
+    "question_1": np.random.choice(levels, 130),
+    "question_2": np.random.choice(levels, 130),
+    "question_3": np.random.choice(levels, 130),
+    "question_4": np.random.choice(levels, 130),
+    "Region": np.random.choice(regions, 130)
 }
 
 df = pd.DataFrame(data)

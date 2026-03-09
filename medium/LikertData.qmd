@@ -23,8 +23,7 @@ If your survey lives in Google Sheets, you have two efficient paths. First, you 
 For Excel files, the readxl package handles import seamlessly. The syntax below shows an import of an example dataset:
 
 ```{r}
-library(readxl)
-survey_data <- read_excel("RawData.xlsx")
+survey_data <- read_excel("customer_feedback.xlsx")
 
 survey_data
 ```
@@ -36,7 +35,9 @@ The installation follows in one of two ways — either via the Packages panel in
 ```{r}
 # install.packages("likert")
 library(likert)
-library(dplyr)
+library(readxl) # for reading data
+library(dplyr) # for select and mutate functions
+library(stringr) # trim whitespace
 ```
 
 The *likert* package sits on top of ggplot2’s visualization foundation, inheriting the same clean, professional aesthetic that data-driven organizations expect. This package transforms raw survey response data into publication-ready visualizations and statistical summaries.
@@ -52,19 +53,74 @@ colnames(survey_data)
 #### unique values
 
 ```{r}
-unique(survey_data$`Variety of food`)
-unique(survey_data$`Room cleanliness`)
-unique(survey_data$`Broadband & TV`)
-unique(survey_data$`Food quality`)
+unique(survey_data$question_1)
+unique(survey_data$Region)
 ```
 
 ```{r}
+# Define levels once to avoid typos
+likert_levels <- c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")
+
 survey_clean <- survey_data |> 
-  select(`Variety of food`, `Room cleanliness`, `Broadband & TV`, `Food quality`) |> 
-  mutate(across(everything(),
-                factor,
-                levels = c("Excellent", "Very good", "Good", "Average", "Poor"),
-                ordered = TRUE))
+  select(question_1, question_2, question_3, question_4) |> 
+  mutate(across(everything(), 
+                \(x) factor(x, levels = likert_levels, ordered = TRUE))) |>
+  as.data.frame() # Important: likert() prefers a standard data.frame over a tibble
+
+# Check levels before plotting
+lapply(survey_clean, levels) 
+
 likert_result <- likert(survey_clean)
 plot(likert_result)
+
+```
+
+In the syntax below, I am telling R through the *likert()* function to use the Region column of the survey_data object as a Likert group. The 5 regions mentioned in the Region column represent where each respondent was located when the survey was taken. This information can help analysts and stakeholders gauge whether dissatisfaction or satisfaction was being driven by a particular region.
+
+Below is the syntax and the resulting Likert plot for survey responses according to 5 regions.
+
+```{r}
+likert_by_region <- likert(survey_clean, grouping = survey_data$Region)
+plot(likert_by_region)
+```
+
+## **Getting the Numbers Behind the Charts**
+
+While visualizations communicate patterns, stakeholders often want the underlying statistics. To do so, use the *summary()* function to calculate percentages automatically. The image below shows the output from the *summary()* function for the *likert_result* object.
+
+```{r}
+summary(likert_result)
+```
+
+### Engagement
+
+```{r}
+#### Engagement
+
+engagement <- read_excel("engagement_survey.xlsx")
+colnames(engagement) <- c("Employee_ID", "leadership", "growth_opportunity", "work_environment", "compensation", "culture", "department", "tenure_years")
+likert_levels <- c("Strongly Disagree", "Disagree", "Neutral", 
+                   "Agree", "Strongly Agree")
+
+engagement_clean <- engagement |>
+  select(leadership, growth_opportunity, work_environment, 
+         compensation, culture) |>
+  mutate(across(everything(), 
+                \(x) factor(stringr::str_trim(x), 
+                            levels = likert_levels,
+                            ordered = TRUE))) |>
+  as.data.frame()  
+
+# Analyze
+engagement_likert <- likert(engagement_clean)
+
+# Visualize
+plot(engagement_likert)
+
+```
+
+```{r}
+# Export summary
+summary_stats <- summary(engagement_likert)
+write.csv(summary_stats, "engagement_results.csv")
 ```
