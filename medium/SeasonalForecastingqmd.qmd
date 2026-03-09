@@ -1,0 +1,46 @@
+---
+title: "Seasonal Forecasting"
+format: html
+editor: visual
+---
+
+## **How to Use Triple Exponential Smoothing for Seasonal Forecasting in R Programming**
+
+#### Smoothing time series data is an essential task for determining a trend in a dataset. Learn how to use smoothing as a forecast technique.
+
+## **Implementing HoltWinters() from the Forecast Library**
+
+The forecast library provides the foundational *HoltWinters()* function for triple exponential smoothing in R. This function requires a time series object created with the `ts()` function, where you specify the frequency parameter matching your seasonal cycle—12 for monthly data with yearly seasonality, 4 for quarterly data, or 7 for daily data with weekly patterns.
+
+```{r}
+# install.packages("forecast")
+```
+
+first code
+
+```{r}
+library(forecast)
+
+# create time series object with monthly data
+sales_data <- c(142, 158, 165, 178, 189, 195,
+                198, 205, 220, 245, 280, 310,
+                155, 172, 180, 192, 205, 210,
+                215, 222, 235, 260, 295, 325)
+
+sales_ts <- ts(sales_data, start = c(2023, 1), frequency = 12)
+
+# Fit Holt-Winters model
+hw_model <- HoltWinters(sales_ts)
+
+# Generate forecasts for next 6 months
+hw_forecast <- forecast(hw_model, h = 6)
+
+# View model summary and forecast
+summary(hw_model)
+print(hw_forecast)
+
+# Plot forecasts with confidence intervals
+plot(hw_forecast, main = "Sales Forecast with Triple Exponential Smoothing")
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
