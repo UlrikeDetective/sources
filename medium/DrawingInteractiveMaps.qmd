@@ -1,0 +1,188 @@
+---
+title: "Drawing ınteractive maps"
+format: html
+editor: visual
+---
+
+# **Drawing ınteractive maps with R: from scratch to user presentation**
+
+By the end of the notebook, you will have produced a map with the following features:
+
+-   Markers showing city locations
+
+-   Marker clustering
+
+-   HTML popup windows
+
+-   Satellite / standard map switching
+
+-   Mini-map
+
+-   Scale bar
+
+-   Drawing tools on the map
+
+And all of this with a single R script.
+
+-   Working Directory
+
+R wants to know which folder it’s working in.
+
+getwd()
+
+### Install packages
+
+```{r}
+install.packages("leaflet")
+install.packages("leaflet.extras")
+```
+
+### Library
+
+```{r}
+library(leaflet)
+library(leaflet.extras)
+```
+
+### Interactive maps
+
+```{r}
+library(leaflet)
+library(leaflet.extras)
+
+# 1. DATA: Added your new locations
+cities <- data.frame(
+  name = c("London", "Manchester", "Birmingham", "Aberdeen", "Bristol", 
+           "Glasgow", "Edinburgh", "Bath", "Cardiff", "Derry", "Oban", 
+           "Orkney Mainland", "North Ronaldsay", "Papa Westray", "Mallaig", 
+           "Brighton", "Belfast", "Portland"),
+  lat  = c(51.5074, 53.4808, 52.4862, 57.1497, 51.4545, 
+           55.8642, 55.9533, 51.3758, 51.4816, 54.9966, 56.4127, 
+           58.9809, 59.3667, 59.3500, 57.0065, 
+           50.8225, 54.5973, 50.5471),
+  lng  = c(-0.1278, -2.2426, -1.8904, -2.0943, -2.5879, 
+           -4.2518, -3.1883, -2.3599, -3.1791, -7.3086, -5.4706, 
+           -3.1360, -2.4333, -2.9000, -5.8306, 
+           -0.1372, -5.9301, -2.4411)
+)
+
+# 2. HTML POPUP CONTENT
+cities$popup_html <- paste0(
+  "<b style='font-size:14px;'>", cities$name, "</b><br>",
+  "Latitude: ", cities$lat, "<br>",
+  "Longitude: ", cities$lng
+)
+
+# 3. CUSTOM ICON FIX
+# Note: Removed system.file(). Use the direct path to your image.
+# Define your image dimensions first
+# Define your specific image dimensions (Check your file properties for exact pixels)
+# Let's assume your pinSmiley01.png is 40 pixels wide and 60 pixels high
+my_w <- 40 
+my_h <- 40
+
+default_icon <- makeIcon(
+  iconUrl = "/Users/ulrike_imac_air/projects/maps/MyTravelMap/pins/Happy_smiley_face.png",
+  iconWidth = my_w, 
+  iconHeight = my_h,
+  
+  # THE FIX:
+  iconAnchorX = my_w / 2, # Centered horizontally
+  iconAnchorY = my_h,     # Tip at the very bottom
+  
+  # Optional: Keep the popup from covering the pin
+  popupAnchorX = 0,
+  popupAnchorY = -my_h   # Moves the popup window to the top of the pin
+)
+
+# 4. INTERACTIVE MAP
+leaflet(cities) %>% 
+  addTiles(group = "Standard") %>% 
+  addProviderTiles("Esri.WorldImagery", group = "Satellite") %>% 
+  addMarkers(
+    ~lng, ~lat,
+    popup = ~popup_html,
+    icon = default_icon, # Using the custom icon here
+    clusterOptions = markerClusterOptions()
+  ) %>% 
+  setView(lng = -3.5, lat = 55, zoom = 6) %>% 
+  addScaleBar(position = "bottomleft") %>% 
+  addMiniMap(toggleDisplay = TRUE) %>% 
+  addDrawToolbar() %>% 
+  addLayersControl(
+    baseGroups = c("Standard", "Satellite"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+### **Real-World Scenario: How ıs this ınteractive map delivered to the user?**
+
+Let’s say someone you’re working with has asked you for an interactive map chart containing specific locations. You’ve created this map using R and RStudio. The code works, the markers appear, zooming in and out functions… everything is fine. But here’s the real question:
+
+How will you send this interactive map to the user?
+
+When you look at the options in the “Export” menu within RStudio, you’ll see two alternatives:
+
+-   Save Image
+
+-   Save as Web Page
+
+However, neither option works the way you think. Let me explain why, step by step:
+
+### **1. You can’t save it with “Save Image” — because interactivity is lost**
+
+This option only takes a screenshot of the map. That means:
+
+-   no zooming in and out,
+
+-   no clickable markers,
+
+-   no pop-ups,
+
+-   zero interactivity.
+
+In short, the interactive feature of your work is completely lost. So if you want to send an interactive map to a user, the “Save Image” option is completely ruled out.
+
+### **2. “Save as Web Page” seems logical at first glance… but it doesn’t work**
+
+This option saves the map as an HTML file. Then you might think:
+
+“Okay, I’ll save the HTML file to my desktop. Then I’ll send this file to the user. When they open it, the map will work.”
+
+But unfortunately, this doesn’t work either. Because the HTML file contains some support files necessary for the map to display:
+
+-   leaflet CSS
+
+-   leaflet JS
+
+-   dependent script files
+
+-   icon links
+
+-   local paths of dependent libraries
+
+These files reference paths on your computer.
+
+Result:
+
+-   the person opening the file on another computer can’t see the map
+
+-   markers don’t load
+
+-   the map box appears empty
+
+-   “dependency not found” warning appears in the console
+
+In other words, the HTML file only works on your computer.
+
+Therefore, “Save as Web Page” is also not suitable for sending to the user.
+
+### **So then, how do you send an interactive map to the user?**
+
+The only correct way to do this is to publish the map on a web server or hosting service.
+
+### **Easiest: Upload via RPubs**
+
+In RStudio, open this path:
+
+File → Publish to RPubs
