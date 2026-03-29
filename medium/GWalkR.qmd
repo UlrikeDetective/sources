@@ -1,0 +1,384 @@
+---
+title: "GWalkR"
+format: html
+editor: visual
+---
+
+# **GWalkR: Providing Interactive Visuals for R Programming Data**
+
+## Your Data Frames Can Be Displayed As Interactive Interfaces, Tableau-Style. Here’s How To Do It With GWalkR
+
+The GWalkR package transforms this workflow by converting any R data frame into an interactive, drag-and-drop interface similar to Tableau. With a single line of code, you gain point-and-click control over your visualizations while keeping your work entirely within the R ecosystem. Whether you’re analyzing customer data, survey responses, or operational metrics, GWalkR provides immediate visual exploration without requiring you to master complex plotting syntax or purchase expensive BI software.
+
+## **Understanding GWalkR’s Core Capabilities**
+
+GWalkR (Graphic Walker for R) is an interactive Exploratory Data Analysis tool that integrates the htmlwidgets framework with the Graphic Walker JavaScript library. The package creates a visual interface where you can drag dimensions and measures onto different encoding channels (x-axis, y-axis, color, size) to build charts instantly. Beyond basic visualization, GWalkR includes built-in data transformation features like filtering, binning, log transformations, and time unit conversions.
+
+The package stands out for three key capabilities that matter to resource-constrained organizations. First, it handles large datasets efficiently through optional DuckDB integration, enabling analysis of millions of rows without performance degradation. Second, it integrates seamlessly with Shiny applications, allowing you to build interactive dashboards without complex JavaScript knowledge. Third, it exports both visualizations and configurations, making it easy to reproduce analyses or share insights across teams.
+
+## **Installing and Basic Usage**
+
+GWalkR is available on CRAN and installs like any standard R package.
+
+```{r}
+install.packages("GWalkR")
+```
+
+The basic function call requires only a data frame. This example will start with the gtcars dataset to demonstrate the core functionality. To do this we need the gt library.
+
+```{r}
+# Load the packages
+library(GWalkR)
+library(gt) # For the gtcars dataset
+```
+
+Then call the data
+
+Next is calling the *gwalkr()* function. The *gwalkr()* function opens an interactive viewer panel in RStudio where you can immediately start exploring your data. When you run function, you get the interface that appears below.
+
+The interface displays all variables from your data frame, automatically classifying them as dimensions (categorical variables) or measures (numeric variables).
+
+The gtcars dataset includes detailed automotive specifications like manufacturer, model, year, horsepower, and pricing, making it ideal for exploring relationships between vehicle characteristics. You can drag these fields onto different parts of the visualization canvas to create charts, apply filters by clicking data points, and switch between chart types (bar, line, scatter, area) using the toolbar controls.
+
+```{r}
+# Load example data
+data(gtcars)
+
+# Launch GWalkR interface
+gwalkr(gtcars)
+```
+
+## **Customizing the Interface**
+
+GWalkR provides several parameters to customize the viewing experience based on your preferences and needs. One of them is the *lang* parameter.
+
+The *lang* parameter sets the interface language, currently supporting English, Japanese, and Chinese. The dark parameter controls the visual theme, with "light" providing a bright interface, "dark" creating a dark mode experience, and "media" automatically adapting to your system preferences. These customization options ensure the tool works comfortably in various environments and for international teams.
+
+Here is the interface with the dark theme selected.
+
+```{r}
+gwalkr(
+  data = gtcars,
+  lang = "en",           # Language: "en", "ja", or "zh"
+  dark = "dark"          # Theme: "Light", "dark", or "media"
+)
+```
+
+For more advanced control over how GWalkR interprets your data, you can specify column specifications that override the automatic type detection. You do that with the *columnSpecs* parameter.
+
+The *columnSpecs* parameter accepts a list of column configurations. Each column can have an *analyticalType* (either "dimension" or "measure") and a *sementicType* ("quantitative", "temporal", "nominal", or "ordinal"). This explicit specification proves valuable when GWalkR misclassifies variables, such as treating year as a continuous measure rather than an ordinal dimension, or treating manufacturer codes as quantitative values. The manual specification ensures your visualizations use appropriate aggregations and encodings for each variable type, which matters particularly when analyzing automotive data where model years and trim levels have inherent ordering.
+
+```{r}
+# Specify column types explicitly
+gwalkr(
+  data = gtcars,
+  columnSpecs = list(
+    mfr = list(
+      analyticalType = "dimension",
+      semanticType = "nominal"
+    ),
+    msrp = list(
+      analyticalType = "measure",
+      semanticType = "quantitative"
+    ),
+    year = list(
+      analyticalType = "dimension",
+      semanticType = "ordinal"
+    )
+  )
+)
+```
+
+## **Working with Large Datasets Using DuckDB**
+
+One of GWalkR’s most powerful features is its ability to handle large datasets through DuckDB integration. The *kernalComputation* parameter activates this capability.
+
+```{r}
+install.packages("arrow")
+```
+
+### using csv file
+
+Data from <https://data.cityofnewyork.us/Transportation/2023-Yellow-Taxi-Trip-Data/4b4i-vvec/about_data>
+
+```{r}
+library(readr)
+library(GWalkR)
+
+# 1. Define the path to your file
+# If the file is in your current working directory:
+file_path <- "2023_Yellow_Taxi_Trip_Data.csv" 
+
+# 2. Read the local CSV
+# read_csv is great because it automatically handles date/time columns
+taxi_data <- read_csv(file_path)
+
+# 3. Launch GWalkR
+gwalkr(
+  data = taxi_data,
+  kernelComputation = TRUE
+)
+```
+
+#### or using API
+
+```{r}
+library(readr)
+library(GWalkR)
+
+# 1. Define the API endpoint URL
+api_url <- "https://data.cityofnewyork.us/resource/4b4i-vvec.json?$query=SELECT%20vendorid%2C%20tpep_pickup_datetime%2C%20tpep_dropoff_datetime%2C%20passenger_count%2C%20trip_distance%2C%20ratecodeid%2C%20store_and_fwd_flag%2C%20pulocationid%2C%20dolocationid%2C%20payment_type%2C%20fare_amount%2C%20extra%2C%20mta_tax%2C%20tip_amount%2C%20tolls_amount%2C%20improvement_surcharge%2C%20total_amount%2C%20congestion_surcharge%2C%20airport_fee%20WHERE%20%60tpep_pickup_datetime%60%20%3E%3D%20'2023-08-01'%20AND%20%60tpep_pickup_datetime%60%20%3C%20'2023-08-03'"
+
+# 2. Read the data directly from the API
+# We use show_col_types = FALSE to keep the console clean
+taxi_data <- read_csv(api_url, show_col_types = FALSE)
+
+# 3. Enable GWalkR with DuckDB computation
+# This is great for large API pulls as it keeps the UI snappy
+gwalkr(
+  data = taxi_data,
+  kernelComputation = TRUE
+)
+```
+
+The *kernalComputation = TRUE* parameter tells GWalkR to offload aggregation calculations to DuckDB rather than performing them in JavaScript within your browser. This architectural shift dramatically improves performance for datasets exceeding 100,000 rows. Where standard ggplot2 might take minutes to render exploratory charts on millions of records, GWalkR with DuckDB delivers interactive visualizations in under a second.
+
+When you activate kernel computation, GWalkR launches a Shiny server in the background that manages the DuckDB connection. The interface queries this server for aggregated results rather than loading the entire dataset into your browser’s memory. This means you can explore massive datasets interactively while consuming minimal local resources. The only caveat is that kernel mode runs a Shiny app that blocks your R console until you stop the viewer.
+
+## **Saving and Reproducing Visualizations**
+
+GWalkR allows you to export visualization configurations so you can reproduce specific charts later or share them with colleagues:
+
+The *visConfig()* parameter accepts a JSON string that encodes all aspects of your current visualization state, including which variables are mapped to which encodings, applied filters, aggregation functions, and chart type selections. When you provide this configuration to a new *gwalkr()* call with the same dataset structure, the interface opens with your exact chart recreated. The *visConfigFile* parameter works identically but reads the configuration from a saved file rather than a string.
+
+This reproducibility feature transforms GWalkR from a pure exploration tool into a reporting asset. You can develop analysis templates with specific views of your data, save the configurations, and apply them systematically to new data loads. For organizations running regular reporting cycles, this eliminates the repetitive work of rebuilding the same visualizations each period.
+
+### Step 1: How to get the JSON string
+
+1.  Run `gwalkr(data = gtcars)` normally.
+
+2.  Arrange your charts exactly how you want them.
+
+3.  Look for the **"Export Config"** button (usually a code icon or a "Save" button in the GWalkR toolbar).
+
+4.  This will give you a long string of text (JSON). **Copy that string.**
+
+### Step 2: How to pass it in
+
+You can paste that string directly into the code, but because JSON is full of quotes, it's much cleaner to save it as a variable first.
+
+R
+
+```         
+# 1. Paste your exported JSON string here
+my_saved_layout <- '[{"visId":"gw_1234","rawFields":..., "encodings":...}]'
+
+# 2. Pass that variable to visConfig
+gwalkr(
+  data = gtcars,
+  visConfig = my_saved_layout
+)
+```
+
+------------------------------------------------------------------------
+
+### Pro-Tip: Loading from a File
+
+If your configuration string is very long (which it usually is), pasting it into your R script makes the code hard to read. A better way is to save that JSON into a `.json` file and load it like this:
+
+R
+
+```         
+# Load the config from a local file
+saved_config <- readLines("my_dashboard_layout.json", warn = FALSE)
+
+gwalkr(
+  data = gtcars,
+  visConfig = saved_config
+)
+```
+
+```{r}
+# Load a saved configuration
+gwalkr(
+  data = gtcars,
+  visConfig = '{"config":"your_json_config_string_here"}'
+)
+```
+
+or load from a file
+
+```{r}
+gwalkr(
+  data = gtcars,
+  visConfigFile = "path.json"
+)
+```
+
+## **Integrating GWalkR with Shiny Applications**
+
+GWalkR provides dedicated Shiny functions that make it straightforward to embed interactive visualizations in your applications:
+
+The *gwalkrOutput()* function creates the UI element where your GWalkR visualization will render. It accepts an *outputId* parameter that links it to the corresponding server-side rendering function, plus optional *width* and *height* parameters that default to "100%" for responsive layouts. The *renderGwalkr()* function wraps your g*walkr()* call and handles all the communication between Shiny's reactive framework and the GWalkR widget.
+
+This integration pattern follows standard Shiny conventions for htmlwidgets, making it intuitive for anyone familiar with Shiny development. The server function remains reactive to any data changes in your app, automatically updating the GWalkR interface when the underlying data frame changes. This means you can create Shiny apps where users upload their own data files, and GWalkR immediately provides them with a full-featured analysis interface.
+
+```{r}
+library(GWalkR)
+library(shiny)
+library(gt)
+
+# Load example data
+data(gtcars)
+
+# Create Shiny app
+app <- shinyApp(
+  ui <- fluidPage(
+    titlePanel("Explore the data here"),
+    gwalkrOutput("mygraph")
+  ),
+  server = function(input, output, session) {
+    output$mygraph <- renderGwalkr(
+      gwalkr(gtcars)
+    )
+  }
+)
+
+# Run the app
+if (interactive()) app
+```
+
+## **Building a Complete Data Exploration Dashboard**
+
+Here’s a practical example showing how to create a Shiny dashboard that lets users upload CSV files and explore them interactively: function creates the UI element where your GWalkR visualization will render. It accepts an `outputId` parameter that links it to the corresponding server-side rendering function, plus optional *width* and *height* parameters that default to "100%" for responsive layouts. The *rendergwalkr()* function wraps your *gwalkr()* call and handles all the communication between Shiny's reactive framework and the GWalkR widget.
+
+This integration pattern follows standard Shiny conventions for htmlwidgets, making it intuitive for anyone familiar with Shiny development. The server function remains reactive to any data changes in your app, automatically updating the GWalkR interface when the underlying data frame changes. This means you can create Shiny apps where users upload their own data files, and GWalkR immediately provides them with a full-featured analysis interface.
+
+## **Building a Complete Data Exploration Dashboard**
+
+Here’s a practical example showing how to create a Shiny dashboard that lets users upload CSV files and explore them interactively:
+
+This application combines *bslib* for modern UI layouts with GWalkR's interactive capabilities. The *page_sidebar()* function creates a dashboard layout with a file upload control in the sidebar. The *fileInput()* widget allows users to select CSV files from their local system. The `uploaded_data` reactive expression reads the uploaded file using`read.csv()`, storing it in a format that automatically updates whenever a new file is uploaded.
+
+The server function uses `renderGwalkr()` to create the visualization output, calling `req()` to ensure the reactive expression only executes after data is successfully uploaded. When a user uploads a CSV file, Shiny reads the file, passes it to `gwalkr()`, and renders the complete interactive interface within the application. Users gain full drag-and-drop control over visualizations without you having to code individual plot types or controls.
+
+## **Advanced Shiny Integration with Multiple Datasets**
+
+For more complex applications, you might want to let users choose between different datasets or switch analyses:
+
+```{r}
+library(GWalkR)
+library(shiny)
+library(bslib)
+
+ui <- page_sidebar(
+  title = "Interactive Data Explorer",
+  
+  sidebar = sidebar(
+    width = 300,
+    fileInput("datafile", "Upload CSV File", accept = c(".csv")),
+    helpText("Upload a CSV file to begin exploring your data")
+  ),
+  
+  # The main content area
+  gwalkrOutput("explorer", height = "800px")
+)
+
+server <- function(input, output, session) {
+  
+  # Read uploaded data
+  uploaded_data <- reactive({
+    req(input$datafile)
+    read.csv(
+      input$datafile$datapath,
+      stringsAsFactors = FALSE
+    )
+  })
+  
+  # Render GWalkR visualization
+  # Note: The function is renderGwalkr (lower 'r' is usually okay, 
+  # but check your version if it requires renderGWalkR)
+  output$explorer <- renderGwalkr({
+    req(uploaded_data())
+    
+    gwalkr(
+      data = uploaded_data(),
+      lang = "en",
+      dark = "light",
+      kernelComputation = TRUE # Highly recommended for smooth exploration
+    )
+  })
+}
+
+shinyApp(ui, server)
+```
+
+#### other methods
+
+```{r}
+library(GWalkR)
+library(shiny)
+library(gt)
+
+# 1. Prepare the data
+data(gtcars)
+
+ui <- fluidPage(
+  titlePanel("Interactive Data Explorer"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      width = 3,
+      selectInput("dataset_choice", "Choose Dataset:",
+                  choices = c("GT Cars", "Upload CSV")),
+      
+      # This only shows up if the user selects 'Upload CSV'
+      conditionalPanel(
+        condition = "input.dataset_choice == 'Upload CSV'",
+        fileInput("datafile", "Upload CSV File", accept = c(".csv"))
+      ),
+      
+      checkboxInput("use_duckdb", "Enable DuckDB", value = TRUE),
+      hr(),
+      helpText("The 'Visualization' and 'Data' tabs are icons at the top-left of the chart area.")
+    ),
+    
+    mainPanel(
+      width = 9,
+      # Force a large height so the toolbar isn't cut off
+      gwalkrOutput("mygraph", height = "800px")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  # 2. Improved Reactive Logic
+  selected_data <- reactive({
+    if (input$dataset_choice == "GT Cars") {
+      return(gtcars)
+    } else {
+      # ONLY require the file if 'Upload CSV' is selected
+      req(input$datafile) 
+      read.csv(input$datafile$datapath, stringsAsFactors = FALSE)
+    }
+  })
+  
+  output$mygraph <- renderGwalkr({
+    # Get the data (will default to gtcars on startup)
+    df <- selected_data()
+    
+    # 3. Render the widget
+    gwalkr(
+      data = df, 
+      kernelComputation = input$use_duckdb
+    )
+  })
+}
+
+shinyApp(ui, server)
+```
+
+```{r}
+GWalkR::gwalkr(gt::gtcars)
+```
