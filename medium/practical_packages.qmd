@@ -1,0 +1,49 @@
+---
+title: "practical_packages"
+format: html
+editor: visual
+---
+
+## **The 3 Most Practical Packages for Data Visualization in R**
+
+## **ggplot2 — The Foundation of Visualization**
+
+`ggplot2` forms the basis of virtually all modern graphics in R. It processes data through a layer-by-layer logic ("grammar of graphics").
+
+```{r}
+library(ggplot2)
+ggplot(mtcars, aes(x = hp, y = mpg, color = factor(cyl))) +
+  geom_point(size = 3) +
+  labs(title = "Engine Power and Fuel Efficiency",
+       x = "Horsepower (hp)",
+       y = "Miles Per Gallon (mpg)",
+       color = "Number of Cylinders")
+```
+
+###  **plotly — Adding Interactivity**
+
+Static graphs are excellent, but sometimes it is necessary to provide interactivity to the user. `plotly` transforms your ggplot2 graph into an interactive one with a single line:
+
+```{r}
+library(plotly)
+p <- ggplot(mtcars, aes(hp, mpg, color = factor(cyl))) +
+  geom_point(size = 3)
+ggplotly(p)
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+### **ggiraph — Clickable Graphics**
+
+`ggiraph` is ideal for web applications or Shiny projects. The points in your graph become clickable:
+
+```{r}
+# install.packages("ggiraph")
+```
+
+```{r}
+library(ggiraph)
+p <- ggplot(mtcars, aes(hp, mpg, tooltip = rownames(mtcars))) +
+  geom_point_interactive(size = 3, color = "steelblue")
+girafe(ggobj = p)
+```
