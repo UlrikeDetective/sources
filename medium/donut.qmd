@@ -1,0 +1,52 @@
+---
+title: "Donut Chart"
+format: html
+editor: visual
+---
+
+# **Donut Chart with R Programming Language**
+
+### **Step-by-Step Donut Chart**
+
+```{r}
+library(tidyverse)
+veriler <- c(100, 300, 250, 400, 600)
+data <- data.frame(
+    xxx = LETTERS[1:length(veriler)],  
+    deger = veriler
+)
+data <- data %>%
+    mutate(
+        fraction = deger / sum(deger),
+        ymax = cumsum(fraction),
+        ymin = c(0, head(ymax, -1))
+    )
+ggplot(data, aes(ymax = ymax, ymin = ymin, xmax = 4, xmin = 3, fill = xxx)) +  
+    geom_rect(color = "black") +
+    coord_polar(theta = "y") +
+    xlim(c(2, 4)) +
+    theme_void() +
+    labs(title = "ABCDE") +
+    scale_fill_brewer(palette = "Set2")
+```
+
+Let’s explain in stages:
+
+-   `geom_rect()` → Draws each slice as a rectangle.
+
+-   `coord_polar(theta = "y")` → Transforms rectangles into circular form, creating a "pie chart" appearance.
+
+-   `xlim(c(2, 4))` → Leaves space in the middle of the chart; this space forms the donut's center.
+
+-   `theme_void()` → Removes unnecessary elements like axes, grids, and text.
+
+-   `labs(title = "ABCDE")` → Adds a title to the chart.
+
+-   `scale_fill_brewer(palette = "Set3")` → Determines the color palette, ensuring visual harmony.
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
