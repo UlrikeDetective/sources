@@ -1,0 +1,74 @@
+---
+title: "Use R to analyse the Nile River measurements"
+format: html
+editor: visual
+---
+
+# **Use R to analyse the Nile River measurements**
+
+The Nile River is the longest river, stretching 6,650 kilometers, flowing north from northeast Africa into the Mediterranean Sea. It has been a lifeline for civilisations for thousands of years, especially Ancient Egypt, where its fertile banks enabled agriculture, settlement, and cultural development.
+
+Because the Nile is such a crucial river, I thought it would be a good idea to analyse the measurements in R’s Nile time series dataset. R’s Nile dataset provides annual measurements of the flow of the Nile River from Ashwan, Egypt from 1871 to 1970. The values are recorded in cubic metres per second.
+
+I have analysed the Nile dataset using Google Colab’s Jupyter Notebook, and have accessed it with the R programming language using the below code, which is typed into the browser:- <https://colab.research.google.com/notebook#create=true&language=r>
+
+I accessed the Nile dataset and determined that it is of class ts, being time series.
+
+I then found out the structure of the dataset, again being time series:-
+
+```{r}
+data(Nile)
+class(Nile)
+
+str(Nile)
+
+Nile
+```
+
+I created a scatter plot of the 100 years of measurements, and noted that it has a mild decrease over the years:-
+
+```{r}
+# Basic scatter plot
+
+plot(Nile,
+     main = "Nile Annual Measurements",
+     xlab = "Year",
+     ylab = "Annual measurements",
+     type="p",
+     pch = 19,     # Solid circle points
+     col = "#8a5a3c")   # Point color
+
+# Add a linear trend line
+model <- lm(Nile ~ time(Nile))
+abline(model, col = "#F1A7A0", lwd = 6)
+
+# Optional: Add a grid for better readability
+grid()
+```
+
+I then broke the dataset into half centuries in order to obtain a better look at the direction of the dataframe:-
+
+```{r}
+# 1. Convert the Nile time-series to a Data Frame
+df <- data.frame(
+  Year = as.numeric(time(Nile)), # Extracts the years (1871-1970)
+  Flow = as.numeric(Nile)        # Extracts the river flow values
+)
+
+# 2. Now your logic works perfectly!
+df$HalfCentury <- ifelse(df$Year <= 1920, "1871-1920", "1921-1970")
+
+# 3. View the result
+head(df, 10)
+```
+
+I plotted box plots of the two half centuries, and have noted that the measurements in the second half century are lower than the first:-
+
+```{r}
+boxplot(Flow ~ HalfCentury, data = df,
+        xlab = "Half Century", ylab = "measurement",
+        main = "Measurement per half century",
+        col = "#b7c48a", las = 2)
+```
+
+The decreased flow of the nile is partly linked to global warming. Human factors, such as overuse, dam construction, irrigation, and water management policies also affect the decreased flow of the Nile.
