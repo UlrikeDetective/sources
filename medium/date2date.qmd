@@ -1,0 +1,196 @@
+---
+title: "date4ts"
+format: html
+editor: visual
+---
+
+## **How to Use date4ts: A Date Wrangling Package for Time Series Analysis in R**
+
+## The date4ts package offers precise, deliberate control over date formatting, merging, and extraction for time series workflows
+
+Time series analysis often runs smoothly until dates become a problem. A retail analyst building monthly revenue reports might import data from two separate systems — one that outputs standard R *Date* objects and another that uses decimal year formats like 2023.25. Reconciling those two date representations into a single cohesive *ts* object can cost more time than the analysis itself.
+
+The **date4ts** package addresses exactly this friction. Released on CRAN and compatible with R 4.1 and above, date4ts provides a focused set of utility functions for converting, merging, modifying, and navigating dates within standard *ts* objects. It covers the tasks that sit between "load the data" and "run the model" — the wrangling layer that every time series workflow needs, but few packages explicitly support.
+
+## **Installing date4ts**
+
+Getting started requires the standard installation call from CRAN (or from the Packages tab in RStudio — you can search and download the package, then call it in your script via the *library()* function.
+
+```{r}
+install.packages("date4ts")
+library(date4ts)
+```
+
+## **Formatting and Converting Dates**
+
+The most immediate problem date4ts solves is translation between R’s native date formats and the *c(YYYY, period)* vector format that the *ts()* function expects.
+
+## **From Date Objects to Time Series Format**
+
+The *date2date_ts()* function accepts a standard R *Date* object and a frequency argument — either 12 for monthly or 4 for quarterly — and returns the *c(YYYY, MM/TT)* vector that *ts()* uses to anchor a series.
+
+```{r}
+## Convert a standard Date to time series format
+my_date <- as.Date("205-05-05")
+
+## date2date_ts converts a Date into a c(year, period) vector
+ts_date <- date2date_ts(my_date, frequency = 12)
+```
+
+This conversion matters because *ts()* itself does not parse *Date* objects directly; it requires this structured vector as its start argument. Having a dedicated function for that translation eliminates a common source of indexing errors, particularly when the starting period is not January or Q1.
+
+## **From Decimal Years to Structured Vectors**
+
+Decimal year formats like *2022.25* appear frequently in exported data from econometric software, financial APIs, and legacy systems. The *as_yyyytt()* and *as_yyyymm()* functions convert those values into structured date vectors.
+
+```{r}
+## Convert a decimal year TimeUnit into a structured date vector
+decimal_year <- 2022.25
+```
+
+Here is how the as_yyyytt() function operates…
+
+```{r}
+## as_yyyytt returns the period in year-quarter format
+qtr_date <- as_yyyytt(decimal_year)
+qtr_date
+```
+
+…and now here is the as_yyyymm() function and its yield.
+
+```{r}
+month_date <- as_yyyymm(decimal_year)
+month_date
+```
+
+The *as_yyyytt()* functionis the more general converter, returning whatever period-unit format corresponds to the given frequency. The *as_yyyymm()* function is the monthly-specific variant, making the intent of the code explicit when working in month-level data. Both functions share the same underlying logic, so choosing between them is primarily a matter of communicating your frequency to colleagues reading your code.
+
+## **Reversing the Conversion**
+
+The reverse path — from a time series position back to a standard *Date* — is handled by the function *date_ts2date()*.
+
+```{r}
+## Both arguments must be explicit integers - use the L suffix
+ts_position <- c(2023L, 4L)
+
+## date_ts2date reconstructs the Date from year and period
+back_to_date <- date_ts2date(date_ts = ts_position, frequency_ts = 12L)
+back_to_date
+```
+
+The *date_ts2date()* function completes the round-trip conversion, returning a standard `Date` object from a time series position vector. Both the *date_ts* and *frequency_ts* arguments expect explicit R integers — written with the L suffix (c(2023L, 4L) and 12L — because the package uses **checkmate** for internal validation and will warn when plain doubles are passed instead. This is particularly useful when passing time series results into packages like **ggplot2** or **dplyr** that expect standard date columns. Rather than manually reconstructing months from integer period values, a single function call handles the arithmetic correctly across year boundaries.
+
+```{r}
+## date_ts2date reconstructs the Date from year and period
+back_to_date <- date_ts2date(date_ts = ts_position, frequency_ts = 12L)
+back_to_date
+## [1] "2023-04-01"
+
+## Create two overlapping monthly ts objects
+sales_2022 <- ts(c(120, 135, 110, 145, 160, 175), start = c(2022, 1), frequency = 12)
+sales_new  <- ts(c(178, 190, 205, 215), start = c(2022, 5), frequency = 12)
+
+## combine2ts merges both; where they overlap, b takes priority
+combined_sales <- combine2ts(sales_2022, sales_new)
+combined_sales
+
+## Extend an existing ts with new end-of-period values
+base_series <- ts(c(500, 520, 515, 530, 545), start = c(2023, 1), frequency = 12)
+
+## extend_ts appends new values to the end of the series
+extended_series <- extend_ts(series = base_series, replacement = c(560, 575, 590))
+extended_series
+```
+
+```{r}
+## Correct a single value at a known date position
+corrected_series <- set_value_ts(
+  series      = extended_series,
+  date_ts     = c(2023L, 3L),  ## integer L suffix required
+  replacement = 518
+)
+
+corrected_series
+```
+
+```{r}
+# Getting values by Data Range
+## Extract a range of values from a monthly ts
+quarterly_window <- get_value_ts(
+  series    = combined_sales,
+  date_from = c(2022L, 3L),
+  date_to   = c(2022L, 6L)
+)
+quarterly_window
+
+## Find the next and previous period relative to a given date
+current_period <- c(2023L, 6L)  ## June 2023
+```
+
+```{r}
+## next_date_ts advances one period forward
+next_period <- next_date_ts(date_ts = current_period, frequency_ts = 12L)
+next_period
+## [1] 2023    7
+
+## previous_date_ts steps one period back
+prev_period <- previous_date_ts(date_ts = current_period, frequency_ts = 12L)
+prev_period
+
+## Identify the boundaries of actual data within a padded series
+padded_series <- ts(
+  c(NA, NA, 300, 320, 335, 350, NA),
+  start = c(2023, 1),
+  frequency = 12
+)
+
+## first_date returns the first period with a non-NA value
+data_start <- first_date(padded_series)
+data_start
+## [1] 2023    3
+
+## last_date returns the last period with a non-NA value
+data_end <- last_date(padded_series)
+data_end
+## [1] 2023    6
+```
+
+```{r}
+## Build a sample quarterly ts for visualization
+quarterly_revenue <- ts(
+  c(1200, 1350, 1100, 1450, 1600, 1750, 1820, 1900),
+  start = c(2022, 1),
+  frequency = 4
+)
+
+## ts2df converts the ts object into a tidy data frame
+revenue_df <- ts2df(quarterly_revenue)
+revenue_df
+
+##    year quarter value
+## 1  2022       1  1200
+## 2  2022       2  1350
+## 3  2022       3  1100
+## 4  2022       4  1450
+## 5  2023       1  1600
+## 6  2023       2  1750
+## 7  2023       3  1820
+## 8  2023       4  1900
+```
+
+```{r}
+## Now the data is ready for ggplot2, dplyr, or gt
+library(ggplot2)
+
+revenue_df |>
+  ggplot(aes(x = date, y = x, group = 1)) +
+  geom_line(color = "#2A7F8E", linewidth = 1.2) +
+  geom_point(color = "#1B3A5C", size = 3) +
+  labs(
+    title    = "Quarterly Revenue Trend",
+    subtitle = "Converted from ts object using ts2df()",
+    x        = "Period",
+    y        = "Revenue"
+  ) +
+  theme_minimal()
+```
