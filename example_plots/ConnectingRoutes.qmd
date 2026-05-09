@@ -1,0 +1,241 @@
+---
+title: "ConnectingRoutes"
+format: html
+editor: visual
+---
+
+# How to draw connecting routes on map with R
+
+This post explains how to draw connection lines between several locations on a map, using `R`. Method relies on the `gcIntermediate` function from the `geosphere` package. Instead of making straight lines, it draws the shortest routes, using [great circles](https://en.wikipedia.org/wiki/Great_circle).
+
+# Draw an empty map
+
+Let’s start by drawing a world map backgroud. Fortunately, the world shape is provided by the `maps` library. It can easily be plotted using the `map()` function that accepts a few arguments for customization.
+
+[Note]{.underline}: visit the [background map](https://r-graph-gallery.com/map.html) section if you want to discover more options to build map in `R`.
+
+```{r}
+# World map is available in the maps package
+library(maps)
+
+# No margin
+par(mar=c(0,0,0,0))
+
+# World map
+map('world',
+    col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,
+    mar=rep(0,4),border=0, ylim=c(-80,80) 
+)
+```
+
+# Add 3 cities
+
+It’s relatively straightforward to add circles at specific positions using the `points()` function. The hardest part is probably to find out the longitute and latitude of the cities you are interested in.
+
+```{r}
+# Dplyr for data wrangling and pipe function
+library(dplyr)
+
+# Cities
+Buenos_aires <- c(-58,-34)
+Paris <- c(2,49)
+Melbourne <- c(145,-38)
+
+# Data frame
+data <- rbind(Buenos_aires, Paris, Melbourne) %>% 
+  as.data.frame()
+colnames(data) <- c("long","lat")
+
+# Show the cities on the map
+map('world',
+    col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,
+    mar=rep(0,4),border=0, ylim=c(-80,80) 
+)
+points(x=data$long, y=data$lat, col="slateblue", cex=3, pch=20)
+```
+
+# Show connection between cities
+
+Now we can connect cities drawing the shortest route between them. This is done using great circles, what gives a better visualization than using straight lines.
+
+The `geosphere` package provides the `gcIntermediate()` function that computes the path. This path can then be plotted using the `lines()` function.
+
+```{r}
+# Load geosphere
+library(geosphere)
+
+# Background map
+map('world',
+    col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,
+    mar=rep(0,4),border=0, ylim=c(-80,80) 
+)
+
+# Dot for cities
+points(x=data$long, y=data$lat, col="slateblue", cex=3, pch=20)
+
+# Compute the connection between Buenos Aires and Paris
+inter <- gcIntermediate(Paris,  Buenos_aires, n=50, addStartEnd=TRUE, breakAtDateLine=F)
+
+# Show this connection
+lines(inter, col="slateblue", lwd=2)
+ 
+# Between Paris and Melbourne
+inter <- gcIntermediate(Melbourne,  Paris, n=50, addStartEnd=TRUE, breakAtDateLine=F)             
+lines(inter, col="slateblue", lwd=2)
+```
+
+Using the exact same method between Melbourne and Buenos Aires gives a pretty disapointing result as shown here.
+
+Indeed, there is a long horizontal line that appears, when we expect the connection to be done on the other side of the globe (and thus invisible)
+
+What happens is that `gcintermediate` follows the shortest path, which means it will go east from Australia until the date line, break the line and come back heading East from the pacific to South America.
+
+Because we do not want to see the horizontal line, we need to plot this connection in 2 steps. To do so we can use the following function, which breaks the line in 2 sections when the distance between 2 points is longer than 180 degrees:
+
+```{r}
+library(maps)
+library(geosphere)
+
+# 1. Define city coordinates (Longitude, Latitude)
+Paris        <- c(2.35, 48.85)
+Buenos_aires <- c(-58.38, -34.60)
+Melbourne    <- c(144.96, -37.81)
+
+# Create a data frame for the city dots
+data <- data.frame(
+  long = c(Paris[1], Buenos_aires[1], Melbourne[1]),
+  lat  = c(Paris[2], Buenos_aires[2], Melbourne[2])
+)
+
+# 2. Draw the Background map
+# We use par(mar...) to handle margins instead of putting 'mar' inside map()
+par(mar=c(0,0,0,0))
+map('world',
+    col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,
+    border=NA, ylim=c(-80,80) 
+)
+
+# 3. A robust function to plot connections
+# This handles the "wrap around" for the dateline automatically
+plot_my_connection <- function(dep_lon, dep_lat, arr_lon, arr_lat, ...){
+    inter <- gcIntermediate(c(dep_lon, dep_lat), c(arr_lon, arr_lat), 
+                            n=50, addStartEnd=TRUE, breakAtDateLine=TRUE)             
+    
+    # If it's a list (happens when breakAtDateLine=TRUE), plot each segment
+    if(is.list(inter)){
+      lines(inter[[1]], ...)
+      lines(inter[[2]], ...)
+    } else {
+      lines(inter, ...)
+    }
+}
+
+# 4. Draw the connections using the function
+plot_my_connection(Paris[1], Paris[2], Buenos_aires[1], Buenos_aires[2], col="slateblue", lwd=2)
+plot_my_connection(Melbourne[1], Melbourne[2], Paris[1], Paris[2], col="slateblue", lwd=2)
+plot_my_connection(Buenos_aires[1], Buenos_aires[2], Melbourne[1], Melbourne[2], col="slateblue", lwd=2)
+
+# 5. Add the dots for cities on top
+points(x=data$long, y=data$lat, col="slateblue", cex=2, pch=20)
+```
+
+# Apply it to several pairs of cities
+
+If we want to plot many connections, it is totally doable to build a `for` loop that draws them one by one.
+
+Moreover, note the use of the `text` function to add city names.
+
+```{r}
+
+# Load libraries
+library(dplyr)
+library(maps)
+library(geosphere)
+
+# 1. Create dataset (Corrected to: Longitude, Latitude)
+data <- data.frame(
+    long = c(18.4, 2.35, 28.0, 103.8, 115.2, 139.6, -99.1, -61.4, -157.8, -122.4, -74.0, 12.3),
+    lat = c(-33.9, 48.8, -26.2, 1.3, -8.4, 35.6, 19.4, 12.5, 21.3, 37.8, 40.7, 45.4),
+    row.names = c("Cape_town", "Paris", "Johannesburg", "Singapore", "Bali", "Tokyo", 
+                  "Mexico_city", "Carriacou", "Honolulu", "San_Francisco", "New_York_City", "Venice")
+)
+
+# 2. Re-define the robust connection function
+plot_my_connection <- function(dep_lon, dep_lat, arr_lon, arr_lat, ...){
+    inter <- gcIntermediate(c(dep_lon, dep_lat), c(arr_lon, arr_lat), 
+                            n=50, addStartEnd=TRUE, breakAtDateLine=TRUE)             
+    if(is.list(inter)){
+      lines(inter[[1]], ...)
+      lines(inter[[2]], ...)
+    } else {
+      lines(inter, ...)
+    }
+}
+
+# 3. Background map
+par(mar=c(0,0,0,0))
+map('world', col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05, border=NA, ylim=c(-80,80))
+
+# 4. Generate pairs by INDEX to keep Lat/Long together
+pairs <- combn(1:nrow(data), 2)
+
+# 5. Loop through pairs
+for(i in 1:ncol(pairs)){
+    p1 <- data[pairs[1, i], ]
+    p2 <- data[pairs[2, i], ]
+    plot_my_connection(p1$long, p1$lat, p2$long, p2$lat, col="skyblue", lwd=0.5)
+}
+
+# 6. Add points and names
+points(x=data$long, y=data$lat, col="slateblue", cex=1, pch=20)
+text(rownames(data), x=data$long, y=data$lat,  col="slateblue", cex=0.7, pos=4)
+```
+
+# An alternative using the greatCircle function
+
+This is the method suggested by the [Simply Statistics](http://simplystatistics.tumblr.com/post/14568185310/an-r-function-to-map-your-twitter-followers) Blog to draw a twitter connection map.
+
+The idea is to calculate the whole great circle, and keep only the part that stays in front of the map, never going behind it.
+
+```{r}
+library(maps)
+library(geosphere)
+
+# 1. Define your cities (Longitude, Latitude)
+# Make sure these are defined before you call them!
+Paris     <- c(2.35, 48.85)
+Honolulu  <- c(-157.85, 21.3)
+Tokyo     <- c(139.6, 35.6)
+Cape_town <- c(18.4, -33.9)
+
+# Put them in a data frame for the dots/labels
+data <- data.frame(
+  long = c(Paris[1], Honolulu[1], Tokyo[1], Cape_town[1]),
+  lat  = c(Paris[2], Honolulu[2], Tokyo[2], Cape_town[2]),
+  row.names = c("Paris", "Honolulu", "Tokyo", "Cape_town")
+)
+
+# 2. Draw the background map
+par(mar=c(0,0,0,0))
+map('world', col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05, border=NA, ylim=c(-80,80))
+
+# 3. Use gcIntermediate for reliable lines
+# We wrap it in a helper to handle the Date Line split automatically
+draw_line <- function(start, end) {
+  inter <- gcIntermediate(start, end, n=50, addStartEnd=TRUE, breakAtDateLine=TRUE)
+  if (is.list(inter)) {
+    lines(inter[[1]], col="skyblue", lwd=2)
+    lines(inter[[2]], col="skyblue", lwd=2)
+  } else {
+    lines(inter, col="skyblue", lwd=2)
+  }
+}
+
+draw_line(Paris, Honolulu)
+draw_line(Honolulu, Tokyo)
+draw_line(Paris, Cape_town)
+
+# 4. Add dots and text
+points(x=data$long, y=data$lat, col="slateblue", cex=2, pch=20)
+text(x=data$long, y=data$lat, labels=rownames(data), col="slateblue", cex=0.8, pos=4)
+```
