@@ -8,23 +8,23 @@ editor: visual
 
 By the end of the notebook, you will have produced a map with the following features:
 
--   Markers showing city locations
+- Markers showing city locations
 
--   Marker clustering
+- Marker clustering
 
--   HTML popup windows
+- HTML popup windows
 
--   Satellite / standard map switching
+- Satellite / standard map switching
 
--   Mini-map
+- Mini-map
 
--   Scale bar
+- Scale bar
 
--   Drawing tools on the map
+- Drawing tools on the map
 
 And all of this with a single R script.
 
--   Working Directory
+- Working Directory
 
 R wants to know which folder it’s working in.
 
@@ -123,9 +123,9 @@ How will you send this interactive map to the user?
 
 When you look at the options in the “Export” menu within RStudio, you’ll see two alternatives:
 
--   Save Image
+- Save Image
 
--   Save as Web Page
+- Save as Web Page
 
 However, neither option works the way you think. Let me explain why, step by step:
 
@@ -133,13 +133,13 @@ However, neither option works the way you think. Let me explain why, step by ste
 
 This option only takes a screenshot of the map. That means:
 
--   no zooming in and out,
+- no zooming in and out,
 
--   no clickable markers,
+- no clickable markers,
 
--   no pop-ups,
+- no pop-ups,
 
--   zero interactivity.
+- zero interactivity.
 
 In short, the interactive feature of your work is completely lost. So if you want to send an interactive map to a user, the “Save Image” option is completely ruled out.
 
@@ -151,27 +151,27 @@ This option saves the map as an HTML file. Then you might think:
 
 But unfortunately, this doesn’t work either. Because the HTML file contains some support files necessary for the map to display:
 
--   leaflet CSS
+- leaflet CSS
 
--   leaflet JS
+- leaflet JS
 
--   dependent script files
+- dependent script files
 
--   icon links
+- icon links
 
--   local paths of dependent libraries
+- local paths of dependent libraries
 
 These files reference paths on your computer.
 
 Result:
 
--   the person opening the file on another computer can’t see the map
+- the person opening the file on another computer can’t see the map
 
--   markers don’t load
+- markers don’t load
 
--   the map box appears empty
+- the map box appears empty
 
--   “dependency not found” warning appears in the console
+- “dependency not found” warning appears in the console
 
 In other words, the HTML file only works on your computer.
 

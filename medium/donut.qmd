@@ -32,17 +32,17 @@ ggplot(data, aes(ymax = ymax, ymin = ymin, xmax = 4, xmin = 3, fill = xxx)) +
 
 Let’s explain in stages:
 
--   `geom_rect()` → Draws each slice as a rectangle.
+- `geom_rect()` → Draws each slice as a rectangle.
 
--   `coord_polar(theta = "y")` → Transforms rectangles into circular form, creating a "pie chart" appearance.
+- `coord_polar(theta = "y")` → Transforms rectangles into circular form, creating a "pie chart" appearance.
 
--   `xlim(c(2, 4))` → Leaves space in the middle of the chart; this space forms the donut's center.
+- `xlim(c(2, 4))` → Leaves space in the middle of the chart; this space forms the donut's center.
 
--   `theme_void()` → Removes unnecessary elements like axes, grids, and text.
+- `theme_void()` → Removes unnecessary elements like axes, grids, and text.
 
--   `labs(title = "ABCDE")` → Adds a title to the chart.
+- `labs(title = "ABCDE")` → Adds a title to the chart.
 
--   `scale_fill_brewer(palette = "Set3")` → Determines the color palette, ensuring visual harmony.
+- `scale_fill_brewer(palette = "Set3")` → Determines the color palette, ensuring visual harmony.
 
 ```{r}
 #| echo: false

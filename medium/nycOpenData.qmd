@@ -22,13 +22,13 @@ install.packages("nycOpenData")
 
 NYC Open Data hosts hundreds of datasets covering topics such as public safety, housing, transportation, education, health, and city services. While these datasets are publicly accessible through the Socrata API, working with them directly often requires:
 
--   knowing dataset identifiers,
+- knowing dataset identifiers,
 
--   manually constructing API queries,
+- manually constructing API queries,
 
--   handling pagination, timeouts, and rate limits,
+- handling pagination, timeouts, and rate limits,
 
--   and performing repetitive data-cleaning steps.
+- and performing repetitive data-cleaning steps.
 
 These barriers can slow down exploratory analysis and make public data less accessible to students, researchers, and practitioners who primarily work in R.
 
@@ -38,31 +38,31 @@ These barriers can slow down exploratory analysis and make public data less acce
 
 The package provides a growing collection of wrapper functions, each corresponding to a specific NYC Open Data dataset or dataset family. All functions follow a shared design pattern and support:
 
--   row limits,
+- row limits,
 
--   optional filtering via named lists,
+- optional filtering via named lists,
 
--   sorting,
+- sorting,
 
--   and graceful handling of API errors and timeouts.
+- and graceful handling of API errors and timeouts.
 
 Examples of currently supported domains include:
 
--   311 service requests
+- 311 service requests
 
--   Transportation and for-hire vehicles
+- Transportation and for-hire vehicles
 
--   Motor vehicle collisions
+- Motor vehicle collisions
 
--   Department of Buildings permits and complaints
+- Department of Buildings permits and complaints
 
--   Education and school reporting
+- Education and school reporting
 
--   Juvenile justice and public safety
+- Juvenile justice and public safety
 
--   Street trees and environmental data
+- Street trees and environmental data
 
--   Permitted events (historical)
+- Permitted events (historical)
 
 A typical call looks like this:
 
@@ -123,23 +123,23 @@ This graph shows us not only *which* complaints were made, but *how many* of eac
 
 A core design principle of `nycOpenData` is reproducibility. Rather than downloading static CSV files that can change over time or be accidentally modified, analyses can explicitly document:
 
--   which dataset was used,
+- which dataset was used,
 
--   how many rows were requested,
+- how many rows were requested,
 
--   which filters were applied,
+- which filters were applied,
 
--   and when the data were accessed.
+- and when the data were accessed.
 
 This makes the package particularly useful for:
 
--   reproducible research projects,
+- reproducible research projects,
 
--   classroom assignments,
+- classroom assignments,
 
--   data journalism,
+- data journalism,
 
--   and exploratory civic analysis.
+- and exploratory civic analysis.
 
 The package is also designed to be API-polite, with configurable timeouts and safeguards that help prevent common failure modes when querying large public datasets.
 
@@ -147,15 +147,15 @@ The package is also designed to be API-polite, with configurable timeouts and sa
 
 `nycOpenData` is intended for a broad audience, including:
 
--   students learning statistics or data science using real-world data,
+- students learning statistics or data science using real-world data,
 
--   instructors teaching reproducible research or applied data analysis,
+- instructors teaching reproducible research or applied data analysis,
 
--   researchers conducting exploratory or descriptive analyses,
+- researchers conducting exploratory or descriptive analyses,
 
--   data journalists and civic technologists,
+- data journalists and civic technologists,
 
--   and anyone interested in working with NYC public data in R.
+- and anyone interested in working with NYC public data in R.
 
 The goal is not to abstract away the data itself, but to make access predictable, transparent, and easy to integrate into standard R workflows.
 
