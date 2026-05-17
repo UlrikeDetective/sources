@@ -1,0 +1,118 @@
+---
+title: "background maps"
+format: html
+editor: visual
+---
+
+## Background maps
+
+# Most basic background map with R and Leaflet
+
+This post is a very basic introduction to the `leaflet` R package. It shows how to display a [background map](https://r-graph-gallery.com/map.html) using default parameters, with reproducible code provided.
+
+This page explains how to display a [background map](https://r-graph-gallery.com/map.html) with the R `leaflet` package.
+
+First initiate the map with the `leaflet()` function. Then add tiles with `addTiles()`. Note the use of the `%>%` operator to “pipe” functions. Here you can see how to get the same result using or not this operator.
+
+By default, you get the map beside. See next charts to learn how to [zoom on a zone](https://r-graph-gallery.com/179-2-select-a-zone-in-leaflet-map.html), change [background style](https://r-graph-gallery.com/180-change-background-in-leaflet-map.html).
+
+```{r}
+# Load the library
+library(leaflet)
+ 
+# Note: if you do not already installed it, install it with:
+# install.packages("leaflet")
+
+# Initialize the leaflet map with the leaflet() function
+m <- leaflet()
+# Then we Add default OpenStreetMap map tiles
+m <- addTiles(m)
+m
+ 
+# Same stuff but using the %>% operator
+m <- leaflet() %>% 
+  addTiles()
+m
+
+# save the widget in a html file if needed.
+# library(htmlwidgets)
+# saveWidget(m, file=paste0( getwd(), "/HtmlWidget/backgroundMapBasic.html"))
+```
+
+### Example for Costa Rica
+
+Zoom levels in Leaflet typically range from `0` (the whole world) to `19` (a single building). A zoom level of **`7`** or **`8`** is ideal for framing the entire country of Costa Rica beautifully in the viewer.
+
+```{r}
+library(leaflet)
+
+# Initialize the leaflet map and set the view to Costa Rica
+m <- leaflet() %>% 
+  addTiles() %>% 
+  # lng = Longitude, lat = Latitude, zoom = 7 is perfect for a small country
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+# Print the map
+m
+
+# Optional: Save the widget to your working directory
+# library(htmlwidgets)
+# saveWidget(m, file = "costa_rica_map.html")
+```
+
+### Costa Rica with black and white tile
+
+```{r}
+library(leaflet)
+
+# Choice 1: A beautiful, clean light-grey/minimalist style
+m <- leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 8)
+
+m
+
+# Choice 2: If you want a literal high-contrast Black & White map
+m_bw <- leaflet() %>% 
+  addProviderTiles("Stadia.StamenTonerLite") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_bw
+```
+
+### City view
+
+```{r}
+m_sf10 <- leaflet() %>% 
+  addProviderTiles("Stadia.StamenTonerLite") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 10)
+
+m_sf10
+
+m_sf13 <- leaflet() %>% 
+  addProviderTiles("Stadia.StamenTonerLite") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 13)
+
+m_sf13
+
+m_sf16 <- leaflet() %>% 
+  addProviderTiles("Stadia.StamenTonerLite") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 16)
+
+m_sf16
+
+m_sf19 <- leaflet() %>% 
+  addProviderTiles("Stadia.StamenTonerLite") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 19)
+
+m_sf19
+
+```
+
+```{r}
+m_sf13 <- leaflet() %>% 
+  addProviderTiles("Stadia.StamenTonerLite") %>% 
+  setView(lng = 37.76647371951237, lat = -122.44198850042363, zoom = 13)
+
+m_sf13
+```
