@@ -246,3 +246,225 @@ m
 # library(htmlwidgets)
 # saveWidget(m, file="HtmlWidget/leaflet-182-add-rectangles.html", selfcontained = F)
 ```
+
+# Loading a tile
+
+This post follows the previous posts on `leaflet`: most [basic map](https://r-graph-gallery.com/179-show-a-map-with-leaflet-r.html), and zooming on a [specific area](https://r-graph-gallery.com/179-2-select-a-zone-in-leaflet-map.html).
+
+`Leaflet` offers several tiles to customize the background used on a map.
+
+A tile can be loaded thanks to the `addProviderTiles()` function.
+
+```{r}
+# Load the library
+library(leaflet)
+
+# Note: if you do not already installed it, install it with:
+# install.packages("leaflet")
+
+# Background 1: NASA
+m <- leaflet() %>% 
+   addTiles() %>% 
+   setView( lng = 2.34, lat = 48.85, zoom = 5 ) %>% 
+   addProviderTiles("NASAGIBS.ViirsEarthAtNight2012")
+m
+ 
+# Background 2: World Imagery
+m <- leaflet() %>% 
+   addTiles() %>% 
+   setView( lng = 2.34, lat = 48.85, zoom = 3 ) %>% 
+   addProviderTiles("Esri.WorldImagery")
+m
+
+# costa rica
+m_cr <- leaflet() %>% 
+  addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_sf10 <- leaflet() %>% 
+  addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 9)
+
+m_sf10
+
+# save the widget in a html file if needed.
+# library(htmlwidgets)
+# saveWidget(m, file=paste0( getwd(), "/HtmlWidget/backgroundMapTile.html", width="1000px"))
+```
+
+# List of tiles
+
+Many tiles are made available. A complete list can be found [here](http://leaflet-extras.github.io/leaflet-providers/preview/index.html). Most famous are probably:
+
+- Nasa: `NASAGIBS.ViirsEarthAtNight2012`
+
+- Google map: `Esri.WorldImagery`
+
+- Gray: `Esri.WorldGrayCanvas`
+
+- Terrain: `Esri.WorldTerrain`
+
+- Topo Map: `Esri.WorldTopoMap`
+
+```{r}
+# costa rica
+m_cr <- leaflet() %>% 
+  addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Esri.WorldImagery") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Esri.WorldGrayCanvas") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Esri.WorldTerrain") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Esri.WorldTopoMap") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Stadia.StamenTonerBlacklite") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Stadia.StamenTonerDark") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Stadia.StamenWatercolor") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Thunderforest.OpenCycleMap") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Thunderforest.SpinalMap") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Thunderforest.MobileAtlas") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Thunderforest.Neighbourhood") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("CyclOSM") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+```
+
+more tiles
+
+```{r}
+m_cr <- leaflet() %>% 
+  addProviderTiles("Jawg.Matrix") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Esri.WorldStreetMap") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("Esri.OceanBasemap") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("CartoDB.PositronNoLabels") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("CartoDB.DarkMatter") %>% 
+  setView(lng = -83.7534, lat = 9.7489, zoom = 7)
+
+m_cr
+```
+
+more
+
+```{r}
+m_cr <- leaflet() %>% 
+  addProviderTiles("OpenRailwayMap") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 9)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("WaymarkedTrails.skating") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 9)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("OpenRailwayMap") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 9)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("SafeCast") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 9)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("WaymarkedTrails.cycling") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 9)
+
+m_cr
+
+m_cr <- leaflet() %>% 
+  addProviderTiles("WaymarkedTrails.hiking") %>% 
+  setView(lng = -122.4419, lat = 37.7664, zoom = 9)
+
+m_cr
+```
