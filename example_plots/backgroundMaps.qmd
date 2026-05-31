@@ -573,3 +573,150 @@ library(oz)
 par(mar=rep(0,4))
 oz( states=TRUE, col="#69b3a2")
 ```
+
+# Open and Plot Geojson files in R
+
+Geojson files are a common way to store geospatial data. This post explains how to read it with `R` and the `sf` package, and how to plot it in base R or with `ggplot2`.
+
+If you did not find the geospatial data you need in existing R packages (see the [map section](https://r-graph-gallery.com/map.html)), you need to find this information elsewhere on the web.
+
+It will often be stored as a `.geoJSON` format. This post explains how to read it.
+
+# Find and download a `.geoJSON` file
+
+You need to dig the internet to find the geoJSON file you are interested in. For instance, [this URL](https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson) provides a file containing french region boundaries.
+
+You can load it in R with:
+
+```{r}
+# Download to a temporary file
+tmp_geojson <- tempfile(fileext = ".geojson")
+download.file(
+  "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson",
+  tmp_geojson
+)
+
+# Let's read the downloaded geoJson file with the sf library:
+library(sf)
+my_sf <- read_sf(tmp_geojson)
+my_sf
+```
+
+```{r}
+# View(my_sf)
+
+# Force the console to print wider rows
+options(width = 1000)
+
+# Print the first few rows
+head(as.data.frame(my_sf))
+
+library(tibble)
+
+# This prints every column vertically, showing the full content of the first few rows
+glimpse(my_sf)
+```
+
+That’s it! You now have a geospatial object called `my_sf`. I strongly advise to read [this post](https://r-graph-gallery.com/169-170-basic-manipulation-of-shapefiles) to learn how to manipulate it.
+
+Just in case, here is how to plot it in base R and with `ggplot2`.
+
+# Plot it with `base R`
+
+The basic `plot()` function knows how to plot a geospatial object. Thus you just need to pass it `my_sf` and add a couple of options to customize the output.
+
+```{r}
+# Select only the region #6 as you would do with a data frame
+my_sf_region_6 <- my_sf[substr(my_sf$code, 1, 2) == "10", ]
+
+par(mar = c(0, 0, 0, 0))
+plot(my_sf_region_6$geometry, col = "#9CB6D9")
+```
+
+It is totally possible (and advised IMO) to build the map with [ggplot2](https://r-graph-gallery.com/ggplot2-package.html), using the `geom_sf()` function as described below.
+
+```{r}
+# Plot it
+library(ggplot2)
+ggplot(my_sf_region_6) +
+  geom_sf(fill = "#69b3a2", color = "white") +
+  theme_void()
+```
+
+# Open and Plot Shapefiles in R
+
+**Shapefiles**, a popular format for storing **geospatial information**, are easily handled in **R** using the `sf` package. This guide will demonstrate **how to read shapefiles** into R and visualize them using either **base R** or the [ggplot2](https://r-graph-gallery.com/ggplot2-package.html) package.
+
+# About shapefiles
+
+------------------------------------------------------------------------
+
+If you did not find the geospatial data you need in existing R packages (see the [map section](https://r-graph-gallery.com/map.html)), you need to find this information elsewhere on the web.
+
+Usually, you will find it as a *shape file* format. This format is composed by **several files** that you need to **keep together** in the same folder.
+
+# Find and download a shapefile.
+
+------------------------------------------------------------------------
+
+You need to dig the internet to find the shape file you are interested in. For instance, [this URL](http://thematicmapping.org/downloads/world_borders.php) will redirect you to a zipped shape file containing the world boundaries.
+
+more maps - <https://mapcruzin.com/download-mexico-canada-us-transportaton-shapefile.htm#mex>
+
+You can download it and unzip it with R:
+
+```{r}
+# Download the shapefile. (note that I store it in a folder called DATA. You have to change that if needed.)
+download.file("https://mapcruzin.com/download-mexico-canada-us-shapefile/mexico-states.zip", destfile = "DATA/world_shape_file.zip")
+# You now have it in your current working directory, have a look!
+
+# Unzip this file. You can do it with R (as below), or clicking on the object you downloaded.
+unzip("DATA/world_shape_file.zip", junkpaths = FALSE)
+#  -- > You now have 4 files. One of these files is a .shp file! (TM_WORLD_BORDERS_SIMPL-0.3.shp)
+```
+
+# Read it with `sf`
+
+------------------------------------------------------------------------
+
+The `sf` package offers the `st_read()` and the `read_sf()` functions that allows to **read shapefile** using the following syntax.
+
+As a result you get a geospatial object (`my_sf` here) that contains all the information we need for further mapping. Please try the following command to understand how this object works:
+
+- `print(my_sf)`: tells you the max and min coordinates, the kind of projection in use and the the **first few rows** of the data associated with the regions.
+
+- `nrow(my_sf)`: how many regions you have
+
+```{r}
+# Read this shape file with the sf library.
+library(sf)
+my_sf <- read_sf("mexbdy.shp")
+
+# -- > Now you have a sf object (simple feature data frame). You can start doing maps!
+
+my_sf
+```
+
+# Plot it with `base R`
+
+------------------------------------------------------------------------
+
+The basic `plot()` function knows how to plot a geospatial object. Thus you just need to pass it `my_sf` and add a couple of options to customize the output.
+
+```{r}
+# Basic plot of this shape file:
+par(mar = c(0, 0, 0, 0))
+plot(st_geometry(my_sf), col = "#f2f2f2", bg = "skyblue", lwd = 0.25, border = 0)
+```
+
+# Plot it with `ggplot2`
+
+It is totally possible (and advised) to build the map with [ggplot2](https://r-graph-gallery.com/ggplot2-package.html), using the `geom_sf()` function as described below.
+
+```{r}
+# Plot it
+library(ggplot2)
+ggplot(my_sf) +
+  geom_sf(fill = "#69b3a2", color = "white") +
+  theme_void()
+```
