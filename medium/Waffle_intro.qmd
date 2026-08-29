@@ -1,0 +1,212 @@
+---
+title: "waffle"
+format: html
+editor: visual
+---
+
+# **Waffle Bar Charts in R and Python: Show The Share of The Dataset, Not Just Size**
+
+## Turn category share into a picture anyone can read without an axis, using the waffle package in R and PyWaffle in Python.
+
+This walkthrough builds waffle charts and waffle bar charts in R two ways, first with plain ggplot2 and then with the **waffle** package, using nycflights23 as a stand-in for the categorical share data marketing teams report every month. A short PyWaffle section covers the same idea in Python.
+
+## **What a Waffle Bar Chart Shows**
+
+A waffle chart is a grid of small squares where each square stands for one unit of the whole. Fill 100 squares in a 10 by 10 block and each tile reads as 1% of the total. Color the tiles by category and the grid shows composition one countable piece at a time.
+
+A waffle bar chart lines up several tiled blocks so you compare groups side by side. Each block still shows its own part-to-whole makeup, and the blocks together work like the bars of a bar chart. You keep the unit-counting benefit of a waffle and gain the group comparison of a bar.
+
+## **Setup**
+
+You only need the waffle package for one of the two routes below. CRAN archived it in September 2025 over a dependency, but you install it from GitHub.
+
+```{r}
+## load packages
+# install.packages("nycflights23")
+# install.packages("dplyr")
+# install.packages("tidyr")
+# install.packages("forcats")
+# install.packages("ggplot2")
+# install.packages("waffle")
+
+library(nycflights23)  ## flight data proxy for categorical share
+library(dplyr)         ## data wrangling with the native pipe
+library(tidyr)         ## uncount() to expand shares into squares
+library(forcats)       ## lump small categoires into "other"
+library(ggplot2)       ## grammar of graphics, geom_tile()
+# library(waffle)        ## optional add-on: waffle() and geom_waffle()
+
+install.packages("remotes")
+remotes::install_github("hrbrmstr/waffle")
+```
+
+The **library()** calls pull in the pieces this article leans on. **nycflights23** supplies a large categorical dataset, which mirrors the carrier, channel, or segment breakdowns marketing teams track. **tidyr** brings **uncount()**, which expands a share table into one row per square for the plain ggplot2 build. **forcats** matters more than it looks, since waffle charts read best with few categories, and **fct_lump_n()** later collapses the long tail into a single “Other” slice.
+
+The **waffle** package has to be downloaded from a GitHub repository. You can use the remote package to do that — the right syntax appears in the image.
+
+The pure ggplot2 path runs without the package. So you can reach for it when you want its shorter syntax or its pictogram extras. The wafflke package is optional, if you need to access the *geom_waffle(*) syntax in your visualization.
+
+```{r}
+flights
+```
+
+## **Build the Share Data**
+
+This section of code creates a pipeline that funnels the rows from the flights object into a tidy share table. T.
+
+First let’s crate a *carrier_names* object for listin the carrier name with its code in the nycflights23 dataset.
+
+Next, let’s note a few functions worth noting to understand what is going into the objects.
+
+```{r}
+## Keep the five busiest carriers, lump the rest into "Other"
+## Convert counts to whole-number percentages for a ~100-square grid
+carrier_names <- c(
+  "9E" = "Endeavor Air", "B6" = "JetBlue",         "DL"    = "Delta",
+  "UA" = "United",       "YX" = "Republic Airways", "Other" = "Other"
+)
+
+## Keep the five busiest carriers, lump the rest into "Other"
+## , then convert counts to whole-number percentages
+carrier_share <- flights |>
+  mutate(carrier = fct_lump_n(carrier, n = 5)) |>
+  count(carrier, name = "flights") |>
+  mutate(
+    carrier = unname(carrier_names[as.character(carrier)]),
+    share   = round(flights / sum(flights) * 100)
+  ) |>
+  arrange(desc(share))
+```
+
+For the *carrier_share* object, the ***fct_lump_n()*** function is helpful to note. The function keeps the top five carriers by volume and files everyone else under “Other”. This arrangement is a convenience step that holds the category count low enough for the grid to stay readable.
+
+The *count()* function tallies flights per carrier, and the **round()** step turns those tallies into whole-number percentages so the tiles map cleanly onto a 10 by 10 grid. Sorting with ***arrange()*** puts the largest slice first, which keeps the legend order intuitive.
+
+## **Set a Named Palette**
+
+Two dark blues sitting side by side are hard to tell apart, and an unnamed color vector reassigns hues whenever the factor order shifts. To keep the consistency you want to see in your waffle bar chart, use a named palette. Each carrier locks to one color, and the hues stay far enough apart to read inside a stacked block.
+
+```{r}
+carrier_colors <- c(
+  "Endeavor Air"     = "#2A7F8E",  ## Teal
+  "JetBlue"          = "#1B3A5C",  ## Navy
+  "Delta"            = "#7BA05B",  ## green
+  "United"           = "#C77B3C",  ## amber
+  "Republic Airways" = "#8E6CA8",  ## purple
+  "Other"            = "#9CA3AF"   ## grey
+)
+```
+
+You can set up an object to handle the colors for each element being considered. Colors can be indicated by HEX specification (or just a text indicator.
+
+The vector maps each airline to a fixed hex value, so **scale_fill_manual()** and the base **waffle()** call draw from one source of truth. Naming the entries matters, since ggplot2 matches named values to fill levels by label rather than position, so a reordered factor can’t quietly swap two carriers’ colors. Keying the palette by the same names the legend shows also keeps the color and label steps in sync. The six hues stay distinct enough that a dominant block reads as one carrier at a glance, which the earlier two-blue palette blurred.
+
+## **A Pure ggplot2 Waffle**
+
+You can build a waffle with ggplot2 alone. The move is to stop looking for a waffle geom and treat the grid as what it is, 100 small tiles. Expand the share data to one row per square, give each square an x and y coordinate, then draw with *geom_tile()*.
+
+```{r}
+## Expand each carrier's share into one row per square (~100 squares)
+waffle_grid <- carrier_share |>
+  uncount(share) |>            ## repeat each row 'share' times
+  mutate(
+    id = row_number() - 1,
+    x  = id %% 10,             ## column, 0 through 9
+    y  = id %/% 10             ## row, 0 through 9
+  )
+```
+
+The work happens before the plot call. The *uncount()* function from tidyr repeats each carrier row as many times as its share, so a 20% carrier becomes 20 rows and the table grows to roughly 100 rows. The modulo (**%%**) and integer division (**%/%**) turn each row’s index into a column and row position on a 10 by 10 grid, which is the coordinate math the waffle package normally hides. ***geom_tile()*** draws one square per row, *coord_equal()* keeps those squares from stretching into rectangles, and ***theme_void()*** strips the axes so the grid reads as a waffle rather than a scatter of boxes. This route carries no dependency beyond the tidyverse, which counts for something while waffle sits in the CRAN archive.
+
+When you run *waffle_grid,* the following waffle bar chart image is created. Each square represents 1% The uncount(share) in the syntax repeats each carrier's row as many times as its *share* value, and *share* is the rounded whole-number percentage from *round(flights / sum(flights) 100)*. Every repeated row then becomes one tile through the *geom_tile()* step. So a carrier sitting at 20% gets 20 rows, which draw as 20 squares, or two full columns of the 10-wide grid.
+
+## **The Same Waffle With the waffle Package**
+
+One naming point clears up a common mix-up. `geom_waffle()` is not part of ggplot2. It ships with the waffle package (the ggwaffle package defines one of its own), so `library(waffle)` is what puts it on your path. The package folds the expansion and coordinate math into one call.
+
+Once crafted, you can create the carrier_share object used to create the waffle bar chart.
+
+The base **waffle()** function takes a named vector and returns a finished grid, with **rows** fixing the height at 10 so each column reads as 10% of departures. The **geom_waffle()** layer covers the same ground inside a ggplot2 pipe, reading the `values` aesthetic and handling the tile math for you, and **flip = TRUE** stacks the fill from the bottom up. Both spare you the **uncount()** and coordinate work from the previous section. **geom_waffle()** also keeps you in the grammar of graphics, so you reuse the themes, scales, and labels from the rest of a report.
+
+Here is what the waffle bar chart in the *carrier_share* object looks like.
+
+```{r}
+## Draw the 10 by 10 grid with tiles
+waffle_grid |>
+  ggplot(aes(x, y, fill = carrier)) +
+  geom_tile(colour = "white", linewidth = 0.8) +
+  scale_fill_manual(values = carrier_colors) +
+  coord_equal() +
+  theme_void()
+```
+
+## **From Waffle to Waffle Bar Chart**
+
+In true data science fashion, you create an object containing the data that has been adjusted to what you want to emphasize. In this instance, the *origin_share* object contains the share of flights according to each airport, using the data cleaning functions from *dplyr* (mutate, group_by)
+
+```{r}
+## Base-style API: a named vector of percentages
+
+install.packages("waffle")
+library(waffle)
+
+parts <- carrier_share$share
+names(parts) <- carrier_share$carrier
+
+waffle(
+  parts,
+  rows = 10,
+  size = 0.5,
+  colors = carrier_colors[names(parts)],
+  title = "Share of NYC departures by carrier",
+  legend_pos = "bottom"
+)
+```
+
+You can then use ggplot to create the waffle bar chart, using the *geom_waffle()* function from the *waffle* package.
+
+```{r}
+## ggplot2 layer: same chart, drawn with geom_waffle()
+carrier_share |>
+  ggplot(aes(fill = carrier, values = share)) +
+  geom_waffle(n_rows = 10, size = 0.5, colour = "white", flip = TRUE) +
+  scale_fill_manual(values = carrier_colors) +
+  coord_equal() +
+  labs(title = "Share of NYC departures by carrier", fill = "Carrier") +
+  theme_minimal()
+```
+
+```{r}
+## Recompute share within each origin airport
+origin_share <- flights |>
+  mutate(carrier = fct_lump_n(carrier, n = 5)) |>
+  count(origin, carrier, name = "flights") |>
+  group_by(origin) |>
+  mutate(share = round(flights / sum(flights) * 100)) |>
+  ungroup() |>
+  mutate(carrier = unname(carrier_names[as.character(carrier)]))
+```
+
+The second pipeline groups by origin before computing share, so each airport gets its own percentages that add to roughly 100. **group_by()** paired with **mutate()** scopes the **round()** calculation to each airport rather than the whole dataset. **facet_wrap()** then splits the plot into one tiled block per origin, set in a single row so the blocks sit next to each other like bars. Reading across EWR, JFK, and LGA, you compare carrier mix airport by airport while every block still shows its own composition. That side-by-side layout turns a waffle into a waffle bar chart.
+
+```{r}
+## One tiled bar per airport, faceted side by side
+origin_share |>
+  ggplot(aes(fill = carrier, values = share)) +
+  geom_waffle(
+    n_rows = 10,
+    size = 0.5,
+    colour = "white",
+    flip = TRUE
+  ) +
+  scale_fill_manual(values = carrier_colors) +
+  facet_wrap(~origin, nrow = 1) +
+  coord_equal() +
+  labs(
+    title = "Carrier share by NYC origin airport",
+    fill = "Carrier"
+  ) +
+  theme_minimal()
+```
+
+Above is the image created from the syntax. You can see that the waffle bar charts display the carrier share according to New York area airports. Within a given chart, every small square stands for about 1% of that airport’s departures. The colored bands show how the carriers, indicated in the legend at the right side of the chart, split up the total. So you’re reading carrier composition airport by airport. Newark leans heavily on one carrier (the big dark block), while JFK and LGA spread their flights across a more even mix of carriers.
