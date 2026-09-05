@@ -1,0 +1,60 @@
+---
+title: "tabstats"
+format: html
+editor: visual
+---
+
+# **How to Use tabstats: Print Clean, Styled Tables in R Programming**
+
+Install packages
+
+```{r}
+# install.packages("tabstats")
+# install.packages("gt")
+```
+
+Library
+
+```{r}
+library(tabstats)
+```
+
+## **table_default(): the general-purpose table**
+
+Most of the time you have a data frame and you want it to read cleanly. *table_default()* handles that case. The simplest call passes a data frame and nothing else.
+
+To start you need to have a dataframe object. The **data()** call loads `gtcars` for the examples without attaching the whole `gt` package, so the console workflow stays dependency-light.
+
+```{r}
+## load the demo dataset
+
+data(gtcars, package = "gt")
+
+## Display the first five rows of mtcars with default settings
+table_default(head(mtcars, 5))
+```
+
+The ***table_default()*** function rounds numeric columns to three digits by default, which is why the integer columns carry trailing zeros. mtcars keeps every column numeric, so it gives a clean first look at the layout.
+
+Most real datasets mix text and numbers in the observations. To show how this appears with the `table_default()` function, an example with gtcars appears below. This case, along with further examples, will demo how the parameters and function features work for creating table options for what you want to display.
+
+```{r}
+## Display five sports cars across text and numberic columns
+table_default(
+  head(gtcars[, c("mfr", "model", "hp", "mpg_c", "msrp")], 5),
+  digits = 0
+)
+```
+
+The *digits = 0* argument drops the trailing zeros for integer specs like horsepower and price, and the text columns line up alongside the numbers without extra setup. You can override rounding per column with `digits_by_col` when one field needs decimals and the rest don't.
+
+Other arguments handle the details that usually take manual work, `na_print` for missing values, `scientific` for notation, `min_width` for column sizing, and `border_char` for the rule character. The `auto_wrap` argument wraps wide tables to the console width instead of letting them run off the screen, which matters for a 15-column frame like the full gtcars.
+
+## **table_summary(): two-column key-value output**
+
+Model diagnostics, descriptive statistics, and dataset readouts share a shape. One column names the thing, the next column holds the value. The *t**able_summary()*** function formats that pattern.
+
+```{r}
+## Summarize horspower across the gtcars fleet
+hp_summary 
+```
